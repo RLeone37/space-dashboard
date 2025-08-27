@@ -249,6 +249,36 @@
     }
 
     // ===== Space Weather =====
+    function normalizeScale(val, prefix){
+      if (val == null) return '--';
+      if (typeof val === 'object'){
+        const s = val.Scale ?? val.scale ?? val.level ?? val.Level ?? val.value ?? val.index;
+        return s != null ? String(s).toUpperCase() : '--';
+      }
+      const s = String(val).toUpperCase();
+      if (/^[GRS]\d$/.test(s)) return s;
+      if (/^\d$/.test(s)) return `${prefix}${s}`;
+      return s;
+    }
+    function pickLatestScales(scales){
+      if (!scales) return null;
+      if (Array.isArray(scales)) return scales[scales.length-1] ?? null;
+      if (typeof scales === 'object'){
+        if (scales['-1']) return scales['-1']; // observed max last 24h (commonly used)
+        if (scales['0']) return scales['0'];   // current/most recent snapshot
+        // else pick the object with the newest timestamp if available
+        let best = null, bestT = -Infinity;
+        for (const k of Object.keys(scales)){
+          const e = scales[k];
+          const ts = e?.TimeStamp || e?.time || e?.Time || e?.timestamp || e?.updated;
+          const t = ts ? Date.parse(ts) : NaN;
+          if (!isNaN(t) && t > bestT){ bestT = t; best = e; }
+        }
+        return best ?? scales[Object.keys(scales).pop()];
+      }
+      return null;
+    }
+
     async function updateSpaceWeather(){
       try{
         // Kp (1-minute): last row
@@ -257,7 +287,6 @@
         if(kpR.ok){
           const arr = await kpR.json();
           const last = arr[arr.length-1];
-          // format: [{time_tag:"YYYY-MM-DD HH:MM:SS", kp_index: value}, ...] (structure can vary; handle generically)
           const time = new Date(last.time_tag || last[0]);
           const val = Number(last.kp_index ?? last[1]);
           kpVal = isFinite(val)? val.toFixed(1): '--';
@@ -281,18 +310,26 @@
           $('#swTime').textContent = timeIdx>=0? `as of ${fmtTime(new Date(last[timeIdx]))}`: '';
         }
 
-        // NOAA Scales (G, R, S) — latest values
+        // NOAA Scales (G, R, S) — robust parsing of both object- and array-shaped JSON
         const scalesR = await fetch('https://services.swpc.noaa.gov/products/noaa-scales.json');
         if(scalesR.ok){
-          const scales = await scalesR.json(); // array of objects with scale indices
-          const latest = scales[scales.length-1] || {};
-          const G = latest.G || latest['G'] || latest.geomagnetic_storm || '--';
-          const R = latest.R || latest['R'] || latest.radio_blackout || '--';
-          const S = latest.S || latest['S'] || latest.solar_radiation_storm || '--';
-          $('#gScale').textContent = `${G}`;
-          $('#rsScale').textContent = `R${R} / S${S}`;
-          $('#gTime').textContent = latest.time ? `as of ${fmtTime(new Date(latest.time))}` : 'Latest NOAA Scales';
-          $('#rsTime').textContent = latest.time ? `as of ${fmtTime(new Date(latest.time))}` : 'Latest NOAA Scales';
+          const raw = await scalesR.json();
+          const latest = pickLatestScales(raw) || {};
+          const G = normalizeScale(latest.G ?? latest.geomagnetic_storm, 'G');
+          const R = normalizeScale(latest.R ?? latest.radio_blackout, 'R');
+          const S = normalizeScale(latest.S ?? latest.solar_radiation_storm, 'S');
+          const tStr = latest.TimeStamp || latest.time || latest.Time || latest.timestamp || '';
+          const t = tStr ? new Date(tStr) : null;
+
+          $('#gScale').textContent = G;
+          $('#rsScale').textContent = `${R} / ${S}`;
+          $('#gTime').textContent = t ? `as of ${fmtTime(t)}` : 'Latest NOAA Scales';
+          $('#rsTime').textContent = t ? `as of ${fmtTime(t)}` : 'Latest NOAA Scales';
+        } else {
+          $('#gScale').textContent = '--';
+          $('#rsScale').textContent = '--';
+          $('#gTime').textContent = 'Latest NOAA Scales';
+          $('#rsTime').textContent = 'Latest NOAA Scales';
         }
         $('#wxAge').textContent = 'updated';
       }catch(e){
