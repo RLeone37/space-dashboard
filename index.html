@@ -338,7 +338,19 @@
           const prov = L.launch_service_provider?.name || '—';
           const stat = L.status?.name || '—';
           const rocket = L.rocket?.configuration?.full_name || L.rocket?.configuration?.name || '—';
-          const web = (L.webcast_live? L.webcast_live : (L.vidURLs?.[0]?.url)) || L.infographic || (L.url) || null;
+          // Prefer real pages: webcast → video → info → infographic → provider site (avoid API JSON)
+      const infoUrl = Array.isArray(L.infoURLs) ? (L.infoURLs.find(u => u?.url)?.url ?? null) : null;
+      const vidUrl = Array.isArray(L.vidURLs) ? (L.vidURLs.find(u => u?.url)?.url ?? null) : null;
+      const webcastLiveUrl = typeof L.webcast_live === 'string' ? L.webcast_live : null;
+      const provName = (L.launch_service_provider?.name || '').toLowerCase();
+      const providerPage =
+        provName.includes('spacex') ? 'https://www.spacex.com/launches/' :
+        provName.includes('nasa') ? 'https://www.nasa.gov/launchschedule/' :
+        (provName.includes('united launch alliance') || provName.includes('ula')) ? 'https://www.ulalaunch.com/missions' :
+        provName.includes('rocket lab') ? 'https://www.rocketlabusa.com/missions/next-mission/' :
+        null;
+      const web = webcastLiveUrl || vidUrl || infoUrl || L.infographic || providerPage || null;
+      const safeWeb = /^https?:\/\//.test(web || '') ? web : null;
 
           const line = document.createElement('div');
           line.className = 'launch';
@@ -350,7 +362,7 @@
               <span class="badge" title="Status">${stat}</span>
             </div>
             <div>
-              <h3 class="title">${web?`<a href="${web}" target="_blank" rel="noopener">${name}</a>`:name}</h3>
+              <h3 class="title">${safeWeb ? `<a href="${safeWeb}" target="_blank" rel="noopener">${name}</a>` : name}</h3>
               <div class="sub">Vehicle: <strong>${rocket}</strong> · Pad: ${loc}</div>
               <div class="sub">NET (local): ${whenLocal}${whenUTC?` · NET (UTC): ${whenUTC}`:''}</div>
             </div>`;
