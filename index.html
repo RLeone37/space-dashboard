@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Space Dashboard · ISS · Space Weather · Launches</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    :root{
+      --bg:#0b0f17; --panel:#111827; --accent:#38bdf8; --text:#e5e7eb; --muted:#9ca3af; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
+    .app{display:grid;grid-template-rows:auto 1fr;min-height:100%}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;gap:12px;background:linear-gradient(180deg,rgba(56,189,248,.15),transparent)}
+    header h1{margin:0;font-size:clamp(18px,2.4vw,22px);letter-spacing:.3px}
+    header .controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .btn{background:#1f2937;border:1px solid #374151;color:var(--text);padding:8px 10px;border-radius:10px;font-size:13px;cursor:pointer}
+    .btn:hover{filter:brightness(1.1)}
+    .grid{display:grid;grid-template-columns:1.5fr 1fr;grid-template-rows:1fr 1fr;gap:12px;padding:12px}
+    .card{background:var(--panel);border:1px solid #1f2937;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.2);overflow:hidden;display:flex;flex-direction:column}
+    .card h2{margin:0;padding:12px 14px;border-bottom:1px solid #1f2937;font-size:16px;display:flex;align-items:center;gap:10px}
+    .card h2 .pill{font-size:11px;color:var(--bg);background:var(--accent);padding:2px 8px;border-radius:999px}
+    /* Layout placement */
+    #map-card{grid-row:1 / span 2}
+    #map{flex:1;min-height:340px}
+    .meta{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:10px;background:#0e1624;border-top:1px solid #1f2937}
+    .meta div{font-size:12px;color:var(--muted)}
+    .meta strong{display:block;color:var(--text);font-weight:600}
+
+    /* Space Weather */
+    .wx{padding:10px;display:grid;gap:10px;grid-template-columns:repeat(2,minmax(0,1fr))}
+    .wx .tile{background:#0e1624;border:1px solid #1f2937;border-radius:12px;padding:10px}
+    .wx .label{font-size:12px;color:var(--muted)}
+    .wx .value{font-size:24px;font-weight:700}
+    .wx .good{color:var(--good)}
+    .wx .warn{color:var(--warn)}
+    .wx .bad{color:var(--bad)}
+    .wx small{color:var(--muted)}
+
+    /* Launches */
+    .launches{flex:1;overflow:hidden}
+    .launch{display:grid;grid-template-columns:auto 1fr;gap:10px;padding:12px;border-bottom:1px solid #1f2937}
+    .launch:last-child{border-bottom:none}
+    .badge{font-size:11px;border:1px solid #374151;border-radius:999px;padding:2px 8px;color:#cbd5e1;white-space:nowrap}
+    .launch .title{margin:0;font-size:14px}
+    .launch .sub{color:var(--muted);font-size:12px;margin-top:3px}
+    a{color:#93c5fd;text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    /* Responsive */
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr;grid-template-rows:auto auto auto}
+      #map-card{grid-row:auto}
+    }
+    /* === Fullscreen: no page scrolling === */
+  :root{ --header-h: 64px; }
+  body{ overflow:hidden; }
+  header{ height:var(--header-h); padding:0 16px; }
+  .grid{ height:calc(100vh - var(--header-h)); overflow:hidden; }
+  .card{ min-height:0; }
+  #map{ min-height:0; }
+  /* Clocks in header */
+  .clocks{display:flex;align-items:center;gap:10px;margin-right:6px}
+  .clock{background:#1f2937;border:1px solid #374151;border-radius:10px;padding:6px 8px}
+  .clock .label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px}
+  .clock .value{font-variant-numeric:tabular-nums;font-size:14px;font-weight:700;line-height:1}
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>Space Dashboard <span class="pill" title="Auto-refreshing">LIVE</span></h1>
+      <div class="controls">
+        <div class="clocks" aria-label="Clocks">
+          <div class="clock" title="Local Time">
+            <div class="label">Local</div>
+            <div class="value" id="localClock">--:--:--</div>
+          </div>
+          <div class="clock" title="Coordinated Universal Time">
+            <div class="label">UTC</div>
+            <div class="value" id="utcClock">--:--:--</div>
+          </div>
+        </div>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+          <input id="followToggle" type="checkbox" checked /> Follow ISS
+        </label>
+        <button id="refreshAll" class="btn" title="Force refresh all panels">Refresh</button>
+        <span id="status" style="font-size:12px;color:#9ca3af"></span>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- MAP -->
+      <section id="map-card" class="card">
+        <h2>ISS Position <span class="pill" id="issAge">--</span></h2>
+        <div id="map"></div>
+        <div class="meta" id="issMeta">
+          <div><span>Latitude</span> <strong id="lat">--</strong></div>
+          <div><span>Longitude</span> <strong id="lon">--</strong></div>
+          <div><span>Altitude</span> <strong id="alt">-- km</strong></div>
+          <div><span>Velocity</span> <strong id="vel">-- km/s</strong></div>
+          <div><span>Visibility</span> <strong id="vis">--</strong></div>
+          <div><span>Updated</span> <strong id="issUpdated">--</strong></div>
+        </div>
+      </section>
+
+      <!-- SPACE WEATHER -->
+      <section class="card" id="wx-card">
+        <h2>Space Weather <span class="pill" id="wxAge">--</span></h2>
+        <div class="wx">
+          <div class="tile">
+            <div class="label">Planetary Kp (1m)</div>
+            <div class="value" id="kpVal">--</div>
+            <small id="kpTime">&nbsp;</small>
+          </div>
+          <div class="tile">
+            <div class="label">Solar Wind Speed</div>
+            <div class="value" id="swSpeed">--</div>
+            <small id="swTime">&nbsp;</small>
+          </div>
+          <div class="tile">
+            <div class="label">Geomagnetic (G) Scale</div>
+            <div class="value" id="gScale">--</div>
+            <small id="gTime">Latest NOAA Scales</small>
+          </div>
+          <div class="tile">
+            <div class="label">Radio Blackout (R) / Solar Radiation (S)</div>
+            <div class="value" id="rsScale">--</div>
+            <small id="rsTime">Latest NOAA Scales</small>
+          </div>
+        </div>
+      </section>
+
+      <!-- LAUNCHES -->
+      <section class="card" id="launch-card">
+        <h2>Upcoming Space Launches <span class="pill" id="launchCount">--</span></h2>
+        <div class="launches" id="launches"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // ===== Utilities =====
+    const $ = (sel) => document.querySelector(sel);
+    const fmtTime = (d) => new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'medium'}).format(d);
+    const fmtNum = (n, d=2) => (n==null?"--": Number(n).toFixed(d));
+    const ago = (d) => {
+      const sec = Math.max(0, (Date.now()-d.getTime())/1000|0);
+      if (sec<60) return `${sec}s ago`; if (sec<3600) return `${(sec/60|0)}m ago`; return `${(sec/3600|0)}h ago`;
+    }
+
+    function updateClocks(){
+      try{
+        const pad = (n)=> String(n).padStart(2,'0');
+        const now = new Date();
+        // Local 24h with date YYYY-MM-DD HH:MM:SS and TZ abbr
+        const y = now.getFullYear();
+        const m = pad(now.getMonth()+1);
+        const d = pad(now.getDate());
+        const hh = pad(now.getHours());
+        const mm = pad(now.getMinutes());
+        const ss = pad(now.getSeconds());
+        const localBase = `${y}-${m}-${d} ${hh}:${mm}:${ss}`;
+        const localAbbr = (()=>{
+          try{
+            const parts = new Intl.DateTimeFormat(undefined,{hour:'2-digit',minute:'2-digit',timeZoneName:'short'}).formatToParts(now);
+            const tz = parts.find(p=>p.type==='timeZoneName')?.value || '';
+            return tz.replace(/^GMT/, 'UTC');
+          }catch{ return ''; }
+        })();
+
+        // UTC 24h with date and TZ abbr
+        const uy = now.getUTCFullYear();
+        const um = pad(now.getUTCMonth()+1);
+        const ud = pad(now.getUTCDate());
+        const uhh = pad(now.getUTCHours());
+        const umm = pad(now.getUTCMinutes());
+        const uss = pad(now.getUTCSeconds());
+        const utcBase = `${uy}-${um}-${ud} ${uhh}:${umm}:${uss}`;
+        const utcAbbr = (()=>{
+          try{
+            const p = new Intl.DateTimeFormat('en-US',{timeZone:'UTC', timeZoneName:'short'}).formatToParts(now);
+            return (p.find(x=>x.type==='timeZoneName')?.value || 'UTC').replace(/^GMT$/, 'UTC');
+          }catch{ return 'UTC'; }
+        })();
+
+        const lc = document.getElementById('localClock'); if(lc) lc.textContent = localAbbr ? `${localBase} (${localAbbr})` : localBase;
+        const uc = document.getElementById('utcClock'); if(uc) uc.textContent = `${utcBase} (${utcAbbr})`;
+      }catch(e){ /* no-op */ }
+    }
+
+    // ===== ISS MAP =====
+    let map, issMarker, issTrack;
+    const trackPoints = [];
+    let followISS = true;
+
+    function initMap(){
+      map = L.map('map', {worldCopyJump:true});
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 6, minZoom: 2, attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      map.setView([0,0], 2);
+      // Ensure map resizes correctly with full-viewport layout
+      window.addEventListener('resize', ()=> { map.invalidateSize(); trimLaunchesToFit(); });
+
+      const issIcon = L.divIcon({className:'iss-dot', html:'<div style="width:14px;height:14px;border-radius:50%;background:#fde047;border:2px solid white;box-shadow:0 0 12px rgba(253,224,71,.9);"></div>', iconSize:[14,14], iconAnchor:[7,7]});
+      issMarker = L.marker([0,0], {icon: issIcon}).addTo(map);
+      issTrack = L.polyline([], {color:'#38bdf8', weight:2, opacity:0.9}).addTo(map);
+
+      $('#followToggle').addEventListener('change', (e)=>{followISS = e.target.checked});
+    }
+
+    async function updateISS(){
+      try{
+        // HTTPS API: WhereTheISS.at
+        const r = await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+        if(!r.ok) throw new Error('ISS API error');
+        const j = await r.json();
+        const {latitude, longitude, altitude, velocity, visibility, timestamp} = j;
+        const pos = [latitude, longitude];
+        issMarker.setLatLng(pos);
+        trackPoints.push(pos);
+        if(trackPoints.length>360) trackPoints.shift();
+        issTrack.setLatLngs(trackPoints);
+        if (followISS) map.panTo(pos, {animate:true, duration:0.5});
+        
+        // UI meta
+        $('#lat').textContent = fmtNum(latitude, 3);
+        $('#lon').textContent = fmtNum(longitude, 3);
+        $('#alt').textContent = `${fmtNum(altitude,1)} km`;
+        $('#vel').textContent = `${fmtNum(velocity/1000,3)} km/s`;
+        $('#vis').textContent = (visibility||'--').toUpperCase();
+        const t = new Date((timestamp||Date.now())*1000);
+        $('#issUpdated').textContent = fmtTime(t);
+        $('#issAge').textContent = ago(t);
+        $('#status').textContent = `Last update: ${fmtTime(new Date())}`;
+      }catch(err){
+        console.error(err);
+        $('#issAge').textContent = 'error';
+      }
+    }
+
+    // ===== Space Weather =====
+    async function updateSpaceWeather(){
+      try{
+        // Kp (1-minute): last row
+        const kpR = await fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json');
+        let kpVal='--', kpT='';
+        if(kpR.ok){
+          const arr = await kpR.json();
+          const last = arr[arr.length-1];
+          // format: [{time_tag:"YYYY-MM-DD HH:MM:SS", kp_index: value}, ...] (structure can vary; handle generically)
+          const time = new Date(last.time_tag || last[0]);
+          const val = Number(last.kp_index ?? last[1]);
+          kpVal = isFinite(val)? val.toFixed(1): '--';
+          kpT = fmtTime(time);
+        }
+        const kpEl = $('#kpVal');
+        kpEl.textContent = kpVal;
+        kpEl.className = 'value ' + (kpVal==='--' ? '' : (kpVal<4?'good':kpVal<6?'warn':'bad'));
+        $('#kpTime').textContent = kpT? `as of ${kpT}`: '';
+
+        // Solar wind plasma speed (km/s)
+        const swR = await fetch('https://services.swpc.noaa.gov/products/solar-wind/plasma-1-day.json');
+        if(swR.ok){
+          const rows = await swR.json(); // first row is header
+          const hdr = rows[0];
+          const speedIdx = hdr.indexOf('speed');
+          const timeIdx = hdr.indexOf('time_tag');
+          const last = rows[rows.length-1];
+          const spd = Number(last[speedIdx]);
+          $('#swSpeed').textContent = isFinite(spd)? `${spd.toFixed(0)} km/s` : '--';
+          $('#swTime').textContent = timeIdx>=0? `as of ${fmtTime(new Date(last[timeIdx]))}`: '';
+        }
+
+        // NOAA Scales (G, R, S) — latest values
+        const scalesR = await fetch('https://services.swpc.noaa.gov/products/noaa-scales.json');
+        if(scalesR.ok){
+          const scales = await scalesR.json(); // array of objects with scale indices
+          const latest = scales[scales.length-1] || {};
+          const G = latest.G || latest['G'] || latest.geomagnetic_storm || '--';
+          const R = latest.R || latest['R'] || latest.radio_blackout || '--';
+          const S = latest.S || latest['S'] || latest.solar_radiation_storm || '--';
+          $('#gScale').textContent = `${G}`;
+          $('#rsScale').textContent = `R${R} / S${S}`;
+          $('#gTime').textContent = latest.time ? `as of ${fmtTime(new Date(latest.time))}` : 'Latest NOAA Scales';
+          $('#rsTime').textContent = latest.time ? `as of ${fmtTime(new Date(latest.time))}` : 'Latest NOAA Scales';
+        }
+        $('#wxAge').textContent = 'updated';
+      }catch(e){
+        console.error(e);
+        $('#wxAge').textContent = 'error';
+      }
+    }
+
+    // ===== Launches (The Space Devs Launch Library 2) =====
+    function trimLaunchesToFit(){
+      const container = document.querySelector('#launches');
+      if(!container) return;
+      requestAnimationFrame(()=>{
+        let guard=500;
+        while(container.scrollHeight > container.clientHeight && container.lastElementChild && guard-- > 0){
+          container.removeChild(container.lastElementChild);
+        }
+        const count = container.children.length;
+        const badge = document.querySelector('#launchCount');
+        if(badge) badge.textContent = count ? String(count) : '—';
+      });
+    }
+    async function updateLaunches(){
+      const container = $('#launches');
+      container.innerHTML = '<div style="padding:12px;color:#9ca3af">Loading…</div>';
+      try{
+        const url = 'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=20&hide_recent_previous=true&mode=detailed';
+        const r = await fetch(url);
+        if(!r.ok) throw new Error('Launch API error');
+        const j = await r.json();
+        const launches = j.results || [];
+        $('#launchCount').textContent = launches.length;
+        container.innerHTML = '';
+        if(!launches.length){
+          container.innerHTML = '<div style="padding:12px;color:#9ca3af">No upcoming launches found.</div>';
+          return;
+        }
+        
+        for(const L of launches){
+          const name = L.name || 'Unnamed Launch';
+          const net = L.net ? new Date(L.net) : null;
+          const loc = L.pad?.location?.name || L.pad?.name || '—';
+          const prov = L.launch_service_provider?.name || '—';
+          const stat = L.status?.name || '—';
+          const rocket = L.rocket?.configuration?.full_name || L.rocket?.configuration?.name || '—';
+          const web = (L.webcast_live? L.webcast_live : (L.vidURLs?.[0]?.url)) || L.infographic || (L.url) || null;
+
+          const line = document.createElement('div');
+          line.className = 'launch';
+          const whenLocal = net? new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(net) : 'TBD';
+          const whenUTC = net? new Intl.DateTimeFormat('en-GB',{hour12:false,timeZone:'UTC',dateStyle:'medium',timeStyle:'short'}).format(net)+' UTC' : '';
+          line.innerHTML = `
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+              <span class="badge" title="Provider">${prov}</span>
+              <span class="badge" title="Status">${stat}</span>
+            </div>
+            <div>
+              <h3 class="title">${web?`<a href="${web}" target="_blank" rel="noopener">${name}</a>`:name}</h3>
+              <div class="sub">Vehicle: <strong>${rocket}</strong> · Pad: ${loc}</div>
+              <div class="sub">NET (local): ${whenLocal}${whenUTC?` · NET (UTC): ${whenUTC}`:''}</div>
+            </div>`;
+          container.appendChild(line);
+        }
+        trimLaunchesToFit();
+      }catch(err){
+        console.error(err);
+        container.innerHTML = '<div style="padding:12px;color:#ef4444">Failed to load launches.</div>';
+        $('#launchCount').textContent = '—';
+      }
+    }
+
+    // ===== Init & Schedules =====
+    updateClocks();
+    initMap();
+    updateISS();
+    updateSpaceWeather();
+    updateLaunches();
+
+    // Auto-refresh cadence
+    setInterval(updateClocks, 1000);
+    setInterval(updateISS, 10_000);       // every 10s
+    setInterval(updateSpaceWeather, 300_000); // every 5m
+    setInterval(updateLaunches, 600_000); // every 10m
+
+    $('#refreshAll').addEventListener('click', ()=>{updateClocks();updateISS();updateSpaceWeather();updateLaunches();});
+  </script>
+</body>
+</html>
