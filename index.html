@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -21,503 +22,504 @@
     --sans: 'Syne', sans-serif;
   }
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--sans);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Starfield */
-  #starfield {
-    position: fixed;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  .wrapper {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 24px;
-  }
-
-  /* HEADER */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: var(--sans);
-    font-weight: 800;
-    font-size: 28px;
-    letter-spacing: 0.2em;
-    background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .logo span {
-    font-weight: 400;
-    opacity: 0.6;
-    font-size: 13px;
-    letter-spacing: 0.15em;
-    display: block;
-    -webkit-text-fill-color: var(--muted);
-    background: none;
-    margin-top: -2px;
-  }
-
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-  }
-
-  .live-dot {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--accent3);
-    letter-spacing: 0.1em;
-  }
-
-  .pulse {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: var(--accent3);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(127,255,107,0.4); }
-    50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(127,255,107,0); }
-  }
-
-  #clock {
-    font-family: var(--mono);
-    font-size: 13px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
-  /* GRID */
-  .grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 380px;
-    grid-template-rows: auto auto;
-    gap: 16px;
-  }
-
-  /* CARD */
-  .card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, rgba(74,158,255,0.03) 0%, transparent 60%);
-    pointer-events: none;
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .card:nth-child(1) { animation-delay: 0.05s; }
-  .card:nth-child(2) { animation-delay: 0.1s; }
-  .card:nth-child(3) { animation-delay: 0.15s; grid-row: 1 / 3; }
-  .card:nth-child(4) { animation-delay: 0.2s; }
-  .card:nth-child(5) { animation-delay: 0.25s; }
-
-  .card-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card-label::before {
-    content: '';
-    width: 16px; height: 1px;
-    background: var(--accent);
-    display: inline-block;
-  }
-
-  .card-title {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 20px;
-    color: var(--text);
-  }
-
-  /* NEXT LAUNCH HERO */
-  .next-launch { grid-column: 1 / 2; }
-
-  .countdown-wrap {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .countdown-unit {
-    flex: 1;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 14px 8px;
-    text-align: center;
-  }
-
-  .countdown-num {
-    font-family: var(--mono);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-    display: block;
-  }
-
-  .countdown-label {
-    font-size: 9px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-top: 6px;
-    display: block;
-  }
-
-  .launch-detail-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-  }
-
-  .launch-detail-row:last-child { border-bottom: none; }
-
-  .launch-detail-key {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  .launch-detail-val {
-    font-weight: 600;
-    font-size: 13px;
-    text-align: right;
-    max-width: 60%;
-  }
-
-  .status-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-  }
-
-  .status-go { background: rgba(127,255,107,0.12); color: var(--accent3); border: 1px solid rgba(127,255,107,0.3); }
-  .status-tbd { background: rgba(255,200,50,0.12); color: #ffc832; border: 1px solid rgba(255,200,50,0.3); }
-  .status-success { background: rgba(74,158,255,0.12); color: var(--accent); border: 1px solid rgba(74,158,255,0.3); }
-  .status-fail { background: rgba(255,60,60,0.12); color: #ff4444; border: 1px solid rgba(255,60,60,0.3); }
-
-  /* UPCOMING LAUNCHES LIST */
-  .launches-list { grid-column: 2 / 3; }
-
-  .launch-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 0;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.2s;
-    cursor: default;
-  }
-
-  .launch-item:last-child { border-bottom: none; }
-
-  .launch-num {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--muted);
-    min-width: 20px;
-    padding-top: 2px;
-  }
-
-  .launch-info { flex: 1; min-width: 0; }
-
-  .launch-name {
-    font-weight: 700;
-    font-size: 14px;
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .launch-meta {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--muted);
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-
-  .launch-date-badge {
-    font-family: var(--mono);
-    font-size: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 4px 8px;
-    color: var(--accent);
-    white-space: nowrap;
-    align-self: flex-start;
-    margin-top: 2px;
-  }
-
-  /* ISS CARD */
-  .iss-card {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .iss-globe {
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #060b1a;
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-    position: relative;
-    flex-shrink: 0;
-  }
-
-  #iss-map {
-    width: 100%;
-    height: 100%;
-  }
-
-  .iss-stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-
-  .iss-stat {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-  }
-
-  .iss-stat-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .iss-stat-val {
-    font-family: var(--mono);
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--accent);
-  }
-
-  .iss-stat-unit {
-    font-size: 10px;
-    color: var(--muted);
-    margin-left: 2px;
-  }
-
-  .crew-section {}
-
-  .crew-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-
-  .crew-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .crew-member {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  .crew-icon {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--accent), #a78bfa);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: white;
-    flex-shrink: 0;
-  }
-
-  .crew-craft {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 9px;
-    color: var(--muted);
-  }
-
-  /* STATS STRIP */
-  .stats-strip {
-    grid-column: 1 / 3;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    background: var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-  }
-
-  .stat-cell {
-    background: var(--surface);
-    padding: 20px 24px;
-    animation: fadeUp 0.6s ease both;
-  }
-
-  .stat-cell:nth-child(1) { animation-delay: 0.3s; }
-  .stat-cell:nth-child(2) { animation-delay: 0.35s; }
-  .stat-cell:nth-child(3) { animation-delay: 0.4s; }
-  .stat-cell:nth-child(4) { animation-delay: 0.45s; }
-
-  .stat-number {
-    font-family: var(--mono);
-    font-size: 36px;
-    font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
-    margin-bottom: 6px;
-  }
-
-  .stat-desc {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 600;
-    letter-spacing: 0.05em;
-  }
-
-  /* Loading */
-  .skeleton {
-    background: linear-gradient(90deg, var(--surface2) 25%, var(--border) 50%, var(--surface2) 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
-    border-radius: 4px;
-    height: 14px;
-    margin: 6px 0;
-  }
-
-  @keyframes shimmer {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-
-  .error-msg {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: #ff6666;
-    padding: 12px;
-    background: rgba(255,60,60,0.06);
-    border: 1px solid rgba(255,60,60,0.2);
-    border-radius: 6px;
-    margin-top: 8px;
-  }
-
-  /* Scrollable list */
-  .scroll-list {
-    max-height: 380px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-  }
-
-  .scroll-list::-webkit-scrollbar { width: 4px; }
-  .scroll-list::-webkit-scrollbar-track { background: transparent; }
-  .scroll-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-  /* SVG Map styles */
-  .map-path { fill: #1a2a4a; stroke: #2a3a6a; stroke-width: 0.5; }
-  .iss-dot { fill: #ff6b35; filter: drop-shadow(0 0 6px #ff6b35); }
-  .iss-track { stroke: rgba(255,107,53,0.3); stroke-width: 1; fill: none; stroke-dasharray: 3,3; }
-
-  @media (max-width: 1100px) {
-    .grid {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto;
-    }
-    .card:nth-child(3) { grid-row: auto; grid-column: 1 / 3; }
-    .stats-strip { grid-template-columns: repeat(2,1fr); }
-  }
-
-  @media (max-width: 680px) {
-    .grid { grid-template-columns: 1fr; }
-    .card:nth-child(3) { grid-column: 1; }
-    .stats-strip { grid-column: 1; grid-template-columns: 1fr 1fr; }
-  }
+- { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+background: var(–bg);
+color: var(–text);
+font-family: var(–sans);
+min-height: 100vh;
+overflow-x: hidden;
+}
+
+/* Starfield */
+#starfield {
+position: fixed;
+inset: 0;
+z-index: 0;
+pointer-events: none;
+}
+
+.wrapper {
+position: relative;
+z-index: 1;
+max-width: 1400px;
+margin: 0 auto;
+padding: 24px;
+}
+
+/* HEADER */
+header {
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 32px;
+padding-bottom: 20px;
+border-bottom: 1px solid var(–border);
+}
+
+.logo {
+font-family: var(–sans);
+font-weight: 800;
+font-size: 28px;
+letter-spacing: 0.2em;
+background: linear-gradient(135deg, var(–accent) 0%, #a78bfa 100%);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+
+.logo span {
+font-weight: 400;
+opacity: 0.6;
+font-size: 13px;
+letter-spacing: 0.15em;
+display: block;
+-webkit-text-fill-color: var(–muted);
+background: none;
+margin-top: -2px;
+}
+
+.header-right {
+display: flex;
+align-items: center;
+gap: 20px;
+}
+
+.live-dot {
+display: flex;
+align-items: center;
+gap: 7px;
+font-family: var(–mono);
+font-size: 11px;
+color: var(–accent3);
+letter-spacing: 0.1em;
+}
+
+.pulse {
+width: 8px; height: 8px;
+border-radius: 50%;
+background: var(–accent3);
+animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(127,255,107,0.4); }
+50% { opacity: 0.7; transform: scale(1.1); box-shadow: 0 0 0 6px rgba(127,255,107,0); }
+}
+
+#clock {
+font-family: var(–mono);
+font-size: 13px;
+color: var(–muted);
+letter-spacing: 0.1em;
+}
+
+/* GRID */
+.grid {
+display: grid;
+grid-template-columns: 1fr 1fr 380px;
+grid-template-rows: auto auto;
+gap: 16px;
+}
+
+/* CARD */
+.card {
+background: var(–surface);
+border: 1px solid var(–border);
+border-radius: 12px;
+padding: 24px;
+position: relative;
+overflow: hidden;
+animation: fadeUp 0.6s ease both;
+}
+
+.card::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, rgba(74,158,255,0.03) 0%, transparent 60%);
+pointer-events: none;
+}
+
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.card:nth-child(1) { animation-delay: 0.05s; }
+.card:nth-child(2) { animation-delay: 0.1s; }
+.card:nth-child(3) { animation-delay: 0.15s; grid-row: 1 / 3; }
+.card:nth-child(4) { animation-delay: 0.2s; }
+.card:nth-child(5) { animation-delay: 0.25s; }
+
+.card-label {
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.2em;
+color: var(–muted);
+text-transform: uppercase;
+margin-bottom: 16px;
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.card-label::before {
+content: ‘’;
+width: 16px; height: 1px;
+background: var(–accent);
+display: inline-block;
+}
+
+.card-title {
+font-size: 18px;
+font-weight: 700;
+margin-bottom: 20px;
+color: var(–text);
+}
+
+/* NEXT LAUNCH HERO */
+.next-launch { grid-column: 1 / 2; }
+
+.countdown-wrap {
+display: flex;
+gap: 12px;
+margin-bottom: 20px;
+}
+
+.countdown-unit {
+flex: 1;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 14px 8px;
+text-align: center;
+}
+
+.countdown-num {
+font-family: var(–mono);
+font-size: 32px;
+font-weight: 700;
+color: var(–accent);
+line-height: 1;
+display: block;
+}
+
+.countdown-label {
+font-size: 9px;
+letter-spacing: 0.15em;
+color: var(–muted);
+text-transform: uppercase;
+margin-top: 6px;
+display: block;
+}
+
+.launch-detail-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 10px 0;
+border-bottom: 1px solid var(–border);
+font-size: 13px;
+}
+
+.launch-detail-row:last-child { border-bottom: none; }
+
+.launch-detail-key {
+font-family: var(–mono);
+font-size: 10px;
+color: var(–muted);
+letter-spacing: 0.1em;
+text-transform: uppercase;
+}
+
+.launch-detail-val {
+font-weight: 600;
+font-size: 13px;
+text-align: right;
+max-width: 60%;
+}
+
+.status-badge {
+display: inline-flex;
+align-items: center;
+gap: 5px;
+padding: 3px 10px;
+border-radius: 20px;
+font-family: var(–mono);
+font-size: 10px;
+letter-spacing: 0.1em;
+font-weight: 700;
+}
+
+.status-go { background: rgba(127,255,107,0.12); color: var(–accent3); border: 1px solid rgba(127,255,107,0.3); }
+.status-tbd { background: rgba(255,200,50,0.12); color: #ffc832; border: 1px solid rgba(255,200,50,0.3); }
+.status-success { background: rgba(74,158,255,0.12); color: var(–accent); border: 1px solid rgba(74,158,255,0.3); }
+.status-fail { background: rgba(255,60,60,0.12); color: #ff4444; border: 1px solid rgba(255,60,60,0.3); }
+
+/* UPCOMING LAUNCHES LIST */
+.launches-list { grid-column: 2 / 3; }
+
+.launch-item {
+display: flex;
+align-items: flex-start;
+gap: 14px;
+padding: 14px 0;
+border-bottom: 1px solid var(–border);
+transition: background 0.2s;
+cursor: default;
+}
+
+.launch-item:last-child { border-bottom: none; }
+
+.launch-num {
+font-family: var(–mono);
+font-size: 11px;
+color: var(–muted);
+min-width: 20px;
+padding-top: 2px;
+}
+
+.launch-info { flex: 1; min-width: 0; }
+
+.launch-name {
+font-weight: 700;
+font-size: 14px;
+margin-bottom: 4px;
+white-space: nowrap;
+overflow: hidden;
+text-overflow: ellipsis;
+}
+
+.launch-meta {
+font-family: var(–mono);
+font-size: 10px;
+color: var(–muted);
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
+}
+
+.launch-date-badge {
+font-family: var(–mono);
+font-size: 10px;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 4px 8px;
+color: var(–accent);
+white-space: nowrap;
+align-self: flex-start;
+margin-top: 2px;
+}
+
+/* ISS CARD */
+.iss-card {
+display: flex;
+flex-direction: column;
+gap: 0;
+}
+
+.iss-globe {
+width: 100%;
+aspect-ratio: 1;
+border-radius: 8px;
+overflow: hidden;
+background: #060b1a;
+border: 1px solid var(–border);
+margin-bottom: 20px;
+position: relative;
+flex-shrink: 0;
+}
+
+#iss-map {
+width: 100%;
+height: 100%;
+}
+
+.iss-stat-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-bottom: 16px;
+}
+
+.iss-stat {
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 8px;
+padding: 12px;
+}
+
+.iss-stat-label {
+font-family: var(–mono);
+font-size: 9px;
+color: var(–muted);
+letter-spacing: 0.15em;
+text-transform: uppercase;
+margin-bottom: 6px;
+}
+
+.iss-stat-val {
+font-family: var(–mono);
+font-size: 16px;
+font-weight: 700;
+color: var(–accent);
+}
+
+.iss-stat-unit {
+font-size: 10px;
+color: var(–muted);
+margin-left: 2px;
+}
+
+.crew-section {}
+
+.crew-label {
+font-family: var(–mono);
+font-size: 9px;
+color: var(–muted);
+letter-spacing: 0.15em;
+text-transform: uppercase;
+margin-bottom: 10px;
+}
+
+.crew-list {
+display: flex;
+flex-direction: column;
+gap: 6px;
+}
+
+.crew-member {
+display: flex;
+align-items: center;
+gap: 10px;
+background: var(–surface2);
+border: 1px solid var(–border);
+border-radius: 6px;
+padding: 8px 12px;
+font-size: 12px;
+font-weight: 600;
+}
+
+.crew-icon {
+width: 22px; height: 22px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(–accent), #a78bfa);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+color: white;
+flex-shrink: 0;
+}
+
+.crew-craft {
+margin-left: auto;
+font-family: var(–mono);
+font-size: 9px;
+color: var(–muted);
+}
+
+/* STATS STRIP */
+.stats-strip {
+grid-column: 1 / 3;
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 1px;
+background: var(–border);
+border-radius: 12px;
+overflow: hidden;
+border: 1px solid var(–border);
+}
+
+.stat-cell {
+background: var(–surface);
+padding: 20px 24px;
+animation: fadeUp 0.6s ease both;
+}
+
+.stat-cell:nth-child(1) { animation-delay: 0.3s; }
+.stat-cell:nth-child(2) { animation-delay: 0.35s; }
+.stat-cell:nth-child(3) { animation-delay: 0.4s; }
+.stat-cell:nth-child(4) { animation-delay: 0.45s; }
+
+.stat-number {
+font-family: var(–mono);
+font-size: 36px;
+font-weight: 700;
+color: var(–accent);
+line-height: 1;
+margin-bottom: 6px;
+}
+
+.stat-desc {
+font-size: 12px;
+color: var(–muted);
+font-weight: 600;
+letter-spacing: 0.05em;
+}
+
+/* Loading */
+.skeleton {
+background: linear-gradient(90deg, var(–surface2) 25%, var(–border) 50%, var(–surface2) 75%);
+background-size: 200% 100%;
+animation: shimmer 1.5s infinite;
+border-radius: 4px;
+height: 14px;
+margin: 6px 0;
+}
+
+@keyframes shimmer {
+0% { background-position: 200% 0; }
+100% { background-position: -200% 0; }
+}
+
+.error-msg {
+font-family: var(–mono);
+font-size: 11px;
+color: #ff6666;
+padding: 12px;
+background: rgba(255,60,60,0.06);
+border: 1px solid rgba(255,60,60,0.2);
+border-radius: 6px;
+margin-top: 8px;
+}
+
+/* Scrollable list */
+.scroll-list {
+max-height: 380px;
+overflow-y: auto;
+scrollbar-width: thin;
+scrollbar-color: var(–border) transparent;
+}
+
+.scroll-list::-webkit-scrollbar { width: 4px; }
+.scroll-list::-webkit-scrollbar-track { background: transparent; }
+.scroll-list::-webkit-scrollbar-thumb { background: var(–border); border-radius: 2px; }
+
+/* SVG Map styles */
+.map-path { fill: #1a2a4a; stroke: #2a3a6a; stroke-width: 0.5; }
+.iss-dot { fill: #ff6b35; filter: drop-shadow(0 0 6px #ff6b35); }
+.iss-track { stroke: rgba(255,107,53,0.3); stroke-width: 1; fill: none; stroke-dasharray: 3,3; }
+
+@media (max-width: 1100px) {
+.grid {
+grid-template-columns: 1fr 1fr;
+grid-template-rows: auto;
+}
+.card:nth-child(3) { grid-row: auto; grid-column: 1 / 3; }
+.stats-strip { grid-template-columns: repeat(2,1fr); }
+}
+
+@media (max-width: 680px) {
+.grid { grid-template-columns: 1fr; }
+.card:nth-child(3) { grid-column: 1; }
+.stats-strip { grid-column: 1; grid-template-columns: 1fr 1fr; }
+}
 </style>
+
 </head>
 <body>
 
@@ -544,78 +546,80 @@
 
   <div class="grid" style="margin-top:16px">
 
-    <!-- NEXT LAUNCH -->
-    <div class="card next-launch">
-      <div class="card-label">Next USA Launch</div>
-      <div id="next-launch-name" class="card-title">Loading...</div>
-      <div class="countdown-wrap" id="countdown-wrap">
-        <div class="countdown-unit"><span class="countdown-num" id="cd-days">--</span><span class="countdown-label">Days</span></div>
-        <div class="countdown-unit"><span class="countdown-num" id="cd-hours">--</span><span class="countdown-label">Hours</span></div>
-        <div class="countdown-unit"><span class="countdown-num" id="cd-mins">--</span><span class="countdown-label">Mins</span></div>
-        <div class="countdown-unit"><span class="countdown-num" id="cd-secs">--</span><span class="countdown-label">Secs</span></div>
-      </div>
-      <div id="next-launch-details">
-        <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
-        <div class="skeleton" style="width:85%"></div>
-      </div>
-    </div>
+```
+<!-- NEXT LAUNCH -->
+<div class="card next-launch">
+  <div class="card-label">Next USA Launch</div>
+  <div id="next-launch-name" class="card-title">Loading...</div>
+  <div class="countdown-wrap" id="countdown-wrap">
+    <div class="countdown-unit"><span class="countdown-num" id="cd-days">--</span><span class="countdown-label">Days</span></div>
+    <div class="countdown-unit"><span class="countdown-num" id="cd-hours">--</span><span class="countdown-label">Hours</span></div>
+    <div class="countdown-unit"><span class="countdown-num" id="cd-mins">--</span><span class="countdown-label">Mins</span></div>
+    <div class="countdown-unit"><span class="countdown-num" id="cd-secs">--</span><span class="countdown-label">Secs</span></div>
+  </div>
+  <div id="next-launch-details">
+    <div class="skeleton"></div><div class="skeleton" style="width:70%"></div>
+    <div class="skeleton" style="width:85%"></div>
+  </div>
+</div>
 
-    <!-- UPCOMING LIST -->
-    <div class="card launches-list">
-      <div class="card-label">Upcoming USA Launches</div>
-      <div class="card-title">Mission Schedule</div>
-      <div class="scroll-list" id="launches-list">
-        <div class="skeleton"></div><div class="skeleton" style="width:80%"></div>
-        <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
-        <div class="skeleton"></div>
-      </div>
-    </div>
+<!-- UPCOMING LIST -->
+<div class="card launches-list">
+  <div class="card-label">Upcoming USA Launches</div>
+  <div class="card-title">Mission Schedule</div>
+  <div class="scroll-list" id="launches-list">
+    <div class="skeleton"></div><div class="skeleton" style="width:80%"></div>
+    <div class="skeleton"></div><div class="skeleton" style="width:60%"></div>
+    <div class="skeleton"></div>
+  </div>
+</div>
 
-    <!-- ISS -->
-    <div class="card iss-card">
-      <div class="card-label">International Space Station</div>
-      <div class="iss-globe">
-        <svg id="iss-map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet">
-          <!-- World map simplified paths -->
-          <rect width="360" height="180" fill="#060b1a"/>
-          <!-- Simplified land masses -->
-          <g id="world-map"></g>
-          <!-- ISS track -->
-          <polyline id="iss-track-line" class="iss-track" points=""/>
-          <!-- ISS dot -->
-          <circle id="iss-dot" class="iss-dot" cx="180" cy="90" r="4"/>
-          <!-- Grid lines -->
-          <line x1="0" y1="90" x2="360" y2="90" stroke="rgba(100,160,255,0.06)" stroke-width="0.5"/>
-          <line x1="180" y1="0" x2="180" y2="180" stroke="rgba(100,160,255,0.06)" stroke-width="0.5"/>
-          <!-- Equator label -->
-          <text x="4" y="94" fill="rgba(100,160,255,0.3)" font-size="6" font-family="monospace">EQ</text>
-        </svg>
-      </div>
-      <div class="iss-stat-grid">
-        <div class="iss-stat">
-          <div class="iss-stat-label">Latitude</div>
-          <div class="iss-stat-val" id="iss-lat">—<span class="iss-stat-unit">°</span></div>
-        </div>
-        <div class="iss-stat">
-          <div class="iss-stat-label">Longitude</div>
-          <div class="iss-stat-val" id="iss-lon">—<span class="iss-stat-unit">°</span></div>
-        </div>
-        <div class="iss-stat">
-          <div class="iss-stat-label">Altitude</div>
-          <div class="iss-stat-val" id="iss-alt">—<span class="iss-stat-unit">km</span></div>
-        </div>
-        <div class="iss-stat">
-          <div class="iss-stat-label">Velocity</div>
-          <div class="iss-stat-val" id="iss-vel">—<span class="iss-stat-unit">km/s</span></div>
-        </div>
-      </div>
-      <div class="crew-section">
-        <div class="crew-label">Current Crew</div>
-        <div class="crew-list" id="crew-list">
-          <div class="skeleton"></div><div class="skeleton" style="width:75%"></div>
-        </div>
-      </div>
+<!-- ISS -->
+<div class="card iss-card">
+  <div class="card-label">International Space Station</div>
+  <div class="iss-globe">
+    <svg id="iss-map" viewBox="0 0 360 180" preserveAspectRatio="xMidYMid meet">
+      <!-- World map simplified paths -->
+      <rect width="360" height="180" fill="#060b1a"/>
+      <!-- Simplified land masses -->
+      <g id="world-map"></g>
+      <!-- ISS track -->
+      <polyline id="iss-track-line" class="iss-track" points=""/>
+      <!-- ISS dot -->
+      <circle id="iss-dot" class="iss-dot" cx="180" cy="90" r="4"/>
+      <!-- Grid lines -->
+      <line x1="0" y1="90" x2="360" y2="90" stroke="rgba(100,160,255,0.06)" stroke-width="0.5"/>
+      <line x1="180" y1="0" x2="180" y2="180" stroke="rgba(100,160,255,0.06)" stroke-width="0.5"/>
+      <!-- Equator label -->
+      <text x="4" y="94" fill="rgba(100,160,255,0.3)" font-size="6" font-family="monospace">EQ</text>
+    </svg>
+  </div>
+  <div class="iss-stat-grid">
+    <div class="iss-stat">
+      <div class="iss-stat-label">Latitude</div>
+      <div class="iss-stat-val" id="iss-lat">—<span class="iss-stat-unit">°</span></div>
     </div>
+    <div class="iss-stat">
+      <div class="iss-stat-label">Longitude</div>
+      <div class="iss-stat-val" id="iss-lon">—<span class="iss-stat-unit">°</span></div>
+    </div>
+    <div class="iss-stat">
+      <div class="iss-stat-label">Altitude</div>
+      <div class="iss-stat-val" id="iss-alt">—<span class="iss-stat-unit">km</span></div>
+    </div>
+    <div class="iss-stat">
+      <div class="iss-stat-label">Velocity</div>
+      <div class="iss-stat-val" id="iss-vel">—<span class="iss-stat-unit">km/s</span></div>
+    </div>
+  </div>
+  <div class="crew-section">
+    <div class="crew-label">Current Crew</div>
+    <div class="crew-list" id="crew-list">
+      <div class="skeleton"></div><div class="skeleton" style="width:75%"></div>
+    </div>
+  </div>
+</div>
+```
 
   </div><!-- /grid -->
 </div><!-- /wrapper -->
@@ -922,5 +926,6 @@ fetchISS();
 fetchCrew();
 setInterval(fetchISS, 5000);
 </script>
+
 </body>
 </html>
