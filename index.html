@@ -28,9 +28,9 @@
   --green:  #39e87b;
   --yellow: #f5c842;
   --red:    #ff5a5a;
-  --text:   #dce8ff;
-  --muted:  #7084b0;
-  --dim:    #45577e;
+  --text:   #f2f6ff;
+  --muted:  #a3b3d6;
+  --dim:    #7386b0;
   --mono:   'DM Mono', monospace;
   --disp:   'Bebas Neue', sans-serif;
   --body:   'DM Sans', sans-serif;
@@ -280,15 +280,15 @@ header {
 .ldate { text-align:center; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:6px 0 5px; }
 .lrow.open .ldate { background:var(--s3); }
 .ldate-a { font-family:var(--disp); font-size:22px; line-height:1; letter-spacing:.03em; }
-.ldate-b { font-family:var(--mono); font-size:9px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-top:2px; }
-.ldate.fuzzy .ldate-a { color:var(--muted); font-size:17px; padding:2px 0; }
+.ldate-b { font-family:var(--mono); font-size:9px; letter-spacing:.12em; color:var(--text); opacity:.75; text-transform:uppercase; margin-top:2px; }
+.ldate.fuzzy .ldate-a { color:var(--yellow); font-size:17px; padding:2px 0; }
 .lbody { min-width:0; }
 .lname { font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
 .lsub { font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.lsub b { color:#aebfe6; font-weight:500; }
+.lsub b { color:#d4def5; font-weight:500; }
 .lright { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
 .ltime { font-family:var(--mono); font-size:11px; color:var(--blue); white-space:nowrap; }
-.ltime.fuzzy { color:var(--dim); }
+.ltime.fuzzy { color:var(--muted); }
 
 .ldet { background:var(--s2); border-radius:0 0 8px 8px; padding:4px 14px 12px 86px;
   border-bottom:1px solid var(--border); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 20px; }
