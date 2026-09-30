@@ -27,9 +27,10 @@
   --orange: #ff6c36;
   --green:  #39e87b;
   --yellow: #f5c842;
+  --red:    #ff5a5a;
   --text:   #dce8ff;
-  --muted:  #5a6e9a;
-  --dim:    #38496e;
+  --muted:  #7084b0;
+  --dim:    #45577e;
   --mono:   'DM Mono', monospace;
   --disp:   'Bebas Neue', sans-serif;
   --body:   'DM Sans', sans-serif;
@@ -48,13 +49,12 @@ body {
   color: var(--text);
   min-height: 100vh;
   min-height: -webkit-fill-available;
-  overflow-x: hidden;
+  overflow: hidden;
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior: none;
-  user-select: none;
-  -webkit-user-select: none;
 }
+button, input { font: inherit; color: inherit; }
 
 /* ─── STARFIELD ──────────────────────────────────────── */
 #stars { position:fixed; inset:0; z-index:0; pointer-events:none; }
@@ -63,8 +63,7 @@ body {
 #app {
   position: relative; z-index: 1;
   display: flex; flex-direction: column;
-  height: 100vh;
-  height: -webkit-fill-available;
+  height: 100vh; height: 100dvh;
   padding-top: var(--sat);
   padding-left: var(--sal);
   padding-right: var(--sar);
@@ -74,7 +73,7 @@ body {
 header {
   flex-shrink: 0;
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 24px 14px;
+  padding: 14px 24px 12px;
   border-bottom: 1px solid var(--border);
   background: rgba(3,6,15,0.7);
   backdrop-filter: blur(20px);
@@ -85,15 +84,17 @@ header {
   background: linear-gradient(110deg, var(--blue) 0%, #9b7aff 100%);
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   background-clip: text; line-height: 1; }
-.wordmark-sub { font-family: var(--mono); font-size: 8px; letter-spacing: 0.2em;
+.wordmark-sub { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em;
   color: var(--muted); text-transform: uppercase; margin-top: 3px; }
 
 .header-right { display:flex; align-items:center; gap:14px; }
 
-.live-pill { display:flex; align-items:center; gap:5px;
+.live-pill { display:flex; align-items:center; gap:6px;
   background: rgba(57,232,123,0.08); border:1px solid rgba(57,232,123,0.2);
-  border-radius:20px; padding:4px 9px;
-  font-family:var(--mono); font-size:9px; color:var(--green); letter-spacing:0.12em; }
+  border-radius:20px; padding:4px 10px;
+  font-family:var(--mono); font-size:10px; color:var(--green); letter-spacing:0.1em; }
+.live-pill.stale { background:rgba(245,200,66,0.08); border-color:rgba(245,200,66,0.25); color:var(--yellow); }
+.live-pill.stale .live-dot { background:var(--yellow); animation:none; }
 .live-dot { width:6px; height:6px; border-radius:50%; background:var(--green);
   animation: blink 2s ease-in-out infinite; }
 @keyframes blink {
@@ -101,7 +102,8 @@ header {
   50%      { opacity:.4; box-shadow:0 0 0 5px rgba(57,232,123,0); }
 }
 
-#utc-clock { font-family:var(--mono); font-size:11px; color:var(--muted); letter-spacing:0.1em; }
+#utc-clock { font-family:var(--mono); font-size:12px; color:var(--muted); letter-spacing:0.08em; text-align:right; }
+#local-clock { font-family:var(--mono); font-size:10px; color:var(--dim); letter-spacing:0.08em; text-align:right; margin-top:2px; }
 
 /* ─── SCROLL AREA ────────────────────────────────────── */
 #scroller {
@@ -111,11 +113,10 @@ header {
   overscroll-behavior-y: contain;
   padding: 16px 16px calc(16px + var(--sab));
 }
-
-/* Desktop: bigger padding */
 @media (min-width: 769px) {
-  #scroller { padding: 20px 24px calc(20px + var(--sab)); }
+  #scroller { padding: 20px 24px calc(24px + var(--sab)); }
 }
+.wrap { max-width: 1400px; margin: 0 auto; }
 
 /* ─── STAT STRIP ─────────────────────────────────────── */
 .stat-strip {
@@ -124,7 +125,6 @@ header {
   gap: 10px;
   margin-bottom: 14px;
 }
-
 .stat-tile {
   background: var(--s1);
   border: 1px solid var(--border);
@@ -138,17 +138,22 @@ header {
 .stat-tile:nth-child(2){--ta:var(--orange)}
 .stat-tile:nth-child(3){--ta:var(--green)}
 .stat-tile:nth-child(4){--ta:var(--yellow)}
-
 .stat-n { font-family:var(--disp); font-size:34px; letter-spacing:0.04em;
-  color:var(--ta,var(--blue)); line-height:1; margin-bottom:4px; }
-.stat-l { font-size:11px; color:var(--muted); font-weight:500; }
+  color:var(--ta,var(--blue)); line-height:1; margin-bottom:4px; font-variant-numeric: tabular-nums; }
+.stat-l { font-size:12px; color:var(--muted); font-weight:500; }
 
 /* ─── GRID ───────────────────────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 320px;
+  grid-template-columns: minmax(0,1fr) 360px;
+  grid-template-areas: "next iss" "list iss";
+  grid-template-rows: auto 1fr;
   gap: 12px;
+  align-items: start;
 }
+#card-next { grid-area: next; }
+#card-list { grid-area: list; }
+#card-iss  { grid-area: iss; position: sticky; top: 0; }
 
 /* ─── CARD ───────────────────────────────────────────── */
 .card {
@@ -158,108 +163,182 @@ header {
   padding: 20px;
   display: flex; flex-direction: column;
   position: relative; overflow: hidden;
+  min-width: 0;
 }
 .card::before { content:''; position:absolute; inset:0;
   background: radial-gradient(ellipse at 0% 0%, rgba(77,159,255,0.04), transparent 60%);
   pointer-events:none; }
 
-.eyebrow { font-family:var(--mono); font-size:8px; letter-spacing:0.22em;
-  color:var(--muted); text-transform:uppercase; margin-bottom:12px;
+.eyebrow { font-family:var(--mono); font-size:10px; letter-spacing:0.2em;
+  color:var(--muted); text-transform:uppercase; margin-bottom:10px;
   display:flex; align-items:center; gap:8px; }
 .eyebrow::before { content:''; display:block; width:14px; height:1px;
   background:var(--ca, var(--blue)); }
 
-.card-title { font-family:var(--disp); font-size:18px; letter-spacing:0.08em;
-  color:var(--text); margin-bottom:16px; }
+.card-head { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.card-title { font-family:var(--disp); font-size:22px; letter-spacing:0.06em;
+  color:var(--text); margin-bottom:14px; line-height:1.05; }
 
-/* ─── COUNTDOWN ──────────────────────────────────────── */
-#card-next { --ca: var(--orange); }
+/* ─── NEXT LAUNCH (HERO) ─────────────────────────────── */
+#card-next { --ca: var(--orange); padding:0; }
+.hero-bg { position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; transition:opacity .6s; }
+.hero-bg.on { opacity:.28; }
+.hero-bg::after { content:''; position:absolute; inset:0;
+  background:linear-gradient(90deg, var(--s1) 20%, rgba(8,14,31,0.7) 60%, rgba(8,14,31,0.35));
+}
+.hero { position:relative; padding:20px; display:grid;
+  grid-template-columns: minmax(0,1.1fr) minmax(0,1fr); gap:22px; }
 
-.cd-row { display:flex; gap:8px; margin-bottom:18px; }
-.cd-unit { flex:1; background:var(--s2); border:1px solid var(--border);
+.scope { display:inline-flex; background:var(--s2); border:1px solid var(--border);
+  border-radius:8px; padding:2px; flex-shrink:0; }
+.scope button { background:none; border:none; cursor:pointer;
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; color:var(--muted);
+  padding:5px 10px; border-radius:6px; }
+.scope button.on { background:var(--s3); color:var(--text); }
+
+.hero-veh { font-family:var(--mono); font-size:11px; letter-spacing:.12em; color:var(--orange);
+  text-transform:uppercase; margin-bottom:4px; }
+.hero-name { font-family:var(--disp); font-size:40px; letter-spacing:0.04em; line-height:1;
+  margin-bottom:10px; overflow-wrap:anywhere; }
+.hero-meta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-bottom:16px; }
+
+.cd-row { display:flex; gap:8px; margin-bottom:10px; }
+.cd-unit { flex:1; background:rgba(12,20,40,0.85); border:1px solid var(--border);
   border-radius:10px; padding:10px 4px; text-align:center; }
-.cd-n { font-family:var(--disp); font-size:32px; letter-spacing:0.04em;
-  color:var(--orange); line-height:1; display:block; }
-.cd-l { font-family:var(--mono); font-size:7px; letter-spacing:0.18em;
+.cd-n { font-family:var(--disp); font-size:36px; letter-spacing:0.04em;
+  color:var(--orange); line-height:1; display:block; font-variant-numeric: tabular-nums; }
+.cd-l { font-family:var(--mono); font-size:9px; letter-spacing:0.16em;
   color:var(--muted); text-transform:uppercase; margin-top:4px; display:block; }
+.cd-note { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.06em; }
+.cd-note b { color:var(--text); font-weight:500; }
 
-.drow { display:flex; justify-content:space-between; align-items:center;
-  padding:8px 0; border-bottom:1px solid var(--border); gap:8px; }
+.drow { display:flex; justify-content:space-between; align-items:baseline;
+  padding:8px 0; border-bottom:1px solid var(--border); gap:12px; }
 .drow:last-child { border-bottom:none; }
-.dk { font-family:var(--mono); font-size:8px; color:var(--muted);
-  letter-spacing:0.14em; text-transform:uppercase; flex-shrink:0; }
-.dv { font-size:12px; font-weight:600; text-align:right; }
+.dk { font-family:var(--mono); font-size:10px; color:var(--muted);
+  letter-spacing:0.12em; text-transform:uppercase; flex-shrink:0; }
+.dv { font-size:13px; font-weight:600; text-align:right; min-width:0; overflow-wrap:anywhere; }
+.dv small { display:block; font-family:var(--mono); font-weight:400; font-size:10px; color:var(--muted); margin-top:2px; }
+
+.hero-queue { position:relative; border-top:1px solid var(--border);
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.hq { padding:12px 20px; border-right:1px solid var(--border); cursor:pointer; min-width:0;
+  background:rgba(8,14,31,0.6); transition:background .15s; }
+.hq:last-child { border-right:none; }
+.hq:hover { background:var(--s2); }
+.hq-t { font-family:var(--mono); font-size:10px; color:var(--blue); letter-spacing:.08em; margin-bottom:3px; }
+.hq-n { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.hq-v { font-size:11px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
 /* ─── BADGES ─────────────────────────────────────────── */
-.bdg { display:inline-flex; align-items:center; padding:2px 8px;
-  border-radius:20px; font-family:var(--mono); font-size:8px; letter-spacing:0.1em; }
+.bdg { display:inline-flex; align-items:center; gap:4px; padding:2px 8px;
+  border-radius:20px; font-family:var(--mono); font-size:10px; letter-spacing:0.08em; white-space:nowrap; }
 .bdg-go   { background:rgba(57,232,123,0.1);  color:var(--green);  border:1px solid rgba(57,232,123,0.25); }
-.bdg-tbd  { background:rgba(245,200,66,0.1);  color:var(--yellow); border:1px solid rgba(245,200,66,0.25); }
-.bdg-ok   { background:rgba(77,159,255,0.1);  color:var(--blue);   border:1px solid rgba(77,159,255,0.25); }
-.bdg-fail { background:rgba(255,80,80,0.1);   color:#ff5555;       border:1px solid rgba(255,80,80,0.25); }
+.bdg-tbd  { background:rgba(245,200,66,0.08); color:var(--yellow); border:1px solid rgba(245,200,66,0.22); }
+.bdg-tbc  { background:rgba(77,159,255,0.1);  color:var(--blue);   border:1px solid rgba(77,159,255,0.25); }
+.bdg-hold { background:rgba(255,108,54,0.1);  color:var(--orange); border:1px solid rgba(255,108,54,0.25); }
+.bdg-fly  { background:rgba(155,122,255,0.12);color:#b39cff;       border:1px solid rgba(155,122,255,0.3); }
+.bdg-fail { background:rgba(255,80,80,0.1);   color:var(--red);    border:1px solid rgba(255,80,80,0.25); }
+.chip-s { font-family:var(--mono); font-size:10px; color:var(--muted); background:var(--s2);
+  border:1px solid var(--border); border-radius:5px; padding:2px 7px; white-space:nowrap; }
 
-/* ─── LAUNCH LIST ────────────────────────────────────── */
+/* ─── SCHEDULE ───────────────────────────────────────── */
 #card-list { --ca: var(--blue); }
+.list-meta { font-family:var(--mono); font-size:10px; color:var(--muted); letter-spacing:.06em; text-align:right; line-height:1.5; }
 
-.list-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch;
-  scrollbar-width:thin; scrollbar-color:var(--s3) transparent;
-  margin:0 -4px; padding:0 4px; }
-.list-scroll::-webkit-scrollbar { width:3px; }
-.list-scroll::-webkit-scrollbar-thumb { background:var(--s3); border-radius:3px; }
+.toolbar { display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+.search { position:relative; }
+.search input { width:100%; background:var(--s2); border:1px solid var(--border); border-radius:10px;
+  padding:10px 12px 10px 34px; font-size:14px; outline:none; transition:border-color .15s; user-select:text; }
+.search input:focus { border-color:rgba(77,159,255,0.5); }
+.search input::placeholder { color:var(--dim); }
+.search svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--muted); }
 
-.lrow { display:flex; align-items:flex-start; gap:10px;
-  padding:11px 0; border-bottom:1px solid var(--border); }
-.lrow:last-child { border-bottom:none; }
-.lidx { font-family:var(--mono); font-size:9px; color:var(--dim);
-  min-width:18px; padding-top:2px; }
-.lbody { flex:1; min-width:0; }
-.lname { font-weight:600; font-size:13px; white-space:nowrap;
-  overflow:hidden; text-overflow:ellipsis; margin-bottom:5px; }
-.ltags { display:flex; flex-wrap:wrap; gap:4px;
-  font-family:var(--mono); font-size:8px; color:var(--muted); }
-.ltag { background:var(--s2); border:1px solid var(--border);
-  border-radius:4px; padding:2px 6px; }
-.ltime { font-family:var(--mono); font-size:8px; color:var(--blue);
-  background:rgba(77,159,255,0.07); border:1px solid rgba(77,159,255,0.15);
-  border-radius:6px; padding:4px 6px; white-space:pre; text-align:right;
-  align-self:flex-start; flex-shrink:0; line-height:1.5; }
+.chips { display:flex; gap:6px; overflow-x:auto; scrollbar-width:none; padding-bottom:2px; }
+.chips::-webkit-scrollbar { display:none; }
+.chip { flex-shrink:0; background:var(--s2); border:1px solid var(--border); border-radius:20px;
+  padding:5px 11px; font-size:12px; font-weight:500; color:var(--muted); cursor:pointer; white-space:nowrap;
+  transition:all .15s; }
+.chip:hover { color:var(--text); }
+.chip.on { background:rgba(77,159,255,0.14); border-color:rgba(77,159,255,0.45); color:var(--text); }
+.chip .n { font-family:var(--mono); font-size:10px; color:var(--dim); margin-left:4px; }
+.chip.on .n { color:var(--blue); }
+.chip-sep { width:1px; background:var(--border); flex-shrink:0; margin:2px 2px; }
+
+.grp { font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--muted); padding:18px 0 8px; display:flex; justify-content:space-between;
+  border-bottom:1px solid var(--border); position:sticky; top:-1px; z-index:2;
+  background:var(--s1); }
+.grp span:last-child { color:var(--dim); }
+
+.lrow { display:grid; grid-template-columns:58px minmax(0,1fr) auto; gap:14px; align-items:center;
+  padding:11px 6px; border-bottom:1px solid var(--border); cursor:pointer;
+  border-radius:8px; transition:background .12s; }
+.lrow:hover { background:rgba(17,28,56,0.55); }
+.lrow.open { background:var(--s2); border-bottom-color:transparent; border-radius:8px 8px 0 0; }
+.ldate { text-align:center; background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:6px 0 5px; }
+.lrow.open .ldate { background:var(--s3); }
+.ldate-a { font-family:var(--disp); font-size:22px; line-height:1; letter-spacing:.03em; }
+.ldate-b { font-family:var(--mono); font-size:9px; letter-spacing:.12em; color:var(--muted); text-transform:uppercase; margin-top:2px; }
+.ldate.fuzzy .ldate-a { color:var(--muted); font-size:17px; padding:2px 0; }
+.lbody { min-width:0; }
+.lname { font-weight:600; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-bottom:3px; }
+.lsub { font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.lsub b { color:#aebfe6; font-weight:500; }
+.lright { display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.ltime { font-family:var(--mono); font-size:11px; color:var(--blue); white-space:nowrap; }
+.ltime.fuzzy { color:var(--dim); }
+
+.ldet { background:var(--s2); border-radius:0 0 8px 8px; padding:4px 14px 12px 86px;
+  border-bottom:1px solid var(--border); display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 20px; }
+.ldet .drow { border-bottom-color:rgba(80,140,255,0.08); }
+.ldet .dv { font-size:12px; font-weight:500; }
+
+.empty { text-align:center; padding:40px 10px; color:var(--muted); font-size:13px; }
+.more { display:block; width:100%; margin-top:12px; background:var(--s2); border:1px solid var(--border);
+  border-radius:10px; padding:10px; cursor:pointer; font-family:var(--mono); font-size:11px; letter-spacing:.1em; color:var(--blue); }
 
 /* ─── ISS ────────────────────────────────────────────── */
 #card-iss { --ca: var(--green); }
-
-.map-wrap { width:100%; aspect-ratio:16/10; border-radius:10px; overflow:hidden;
-  background:#040b1c; border:1px solid var(--border); margin-bottom:14px; flex-shrink:0; }
+.map-wrap { width:100%; aspect-ratio:16/9; border-radius:10px; overflow:hidden;
+  background:#040b1c; border:1px solid var(--border); margin-bottom:12px; flex-shrink:0; }
 #iss-svg { width:100%; height:100%; display:block; }
 
-.iss-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+.iss-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px; }
 .iss-tile { background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:9px 11px; }
-.iss-tl { font-family:var(--mono); font-size:7px; color:var(--muted);
-  letter-spacing:0.16em; text-transform:uppercase; margin-bottom:4px; }
-.iss-tv { font-family:var(--disp); font-size:18px; letter-spacing:0.04em;
-  color:var(--green); line-height:1; }
-.iss-tu { font-family:var(--mono); font-size:8px; color:var(--muted); }
+.iss-tl { font-family:var(--mono); font-size:9px; color:var(--muted);
+  letter-spacing:0.14em; text-transform:uppercase; margin-bottom:4px; }
+.iss-tv { font-family:var(--disp); font-size:20px; letter-spacing:0.04em;
+  color:var(--green); line-height:1; font-variant-numeric: tabular-nums; }
+.iss-tu { font-family:var(--mono); font-size:10px; color:var(--muted); margin-left:2px; }
 
-.crew-ttl { font-family:var(--mono); font-size:8px; letter-spacing:0.2em;
-  color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+.crew-ttl { font-family:var(--mono); font-size:10px; letter-spacing:0.16em;
+  color:var(--muted); text-transform:uppercase; margin:12px 0 7px; display:flex; justify-content:space-between; }
+.crew-ttl:first-child { margin-top:0; }
 .crew-list { display:flex; flex-direction:column; gap:5px; }
-.crew-item { display:flex; align-items:center; gap:9px;
+.crew-item { display:flex; align-items:center; gap:10px;
   background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:7px 10px; }
-.crew-av { width:24px; height:24px; border-radius:50%;
+.crew-av { width:26px; height:26px; border-radius:50%;
   background:linear-gradient(135deg,var(--blue),#7c5cfc);
   display:flex; align-items:center; justify-content:center;
-  font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
-.crew-name { font-size:12px; font-weight:600; flex:1; }
-.crew-craft { font-family:var(--mono); font-size:7px; color:var(--muted); }
+  font-size:11px; font-weight:700; color:#fff; flex-shrink:0; overflow:hidden; }
+.crew-av img { width:100%; height:100%; object-fit:cover; }
+.crew-name { font-size:13px; font-weight:600; flex:1; min-width:0; }
+.crew-name small { display:block; font-size:11px; font-weight:400; color:var(--muted); }
+.crew-days { font-family:var(--mono); font-size:10px; color:var(--muted); text-align:right; white-space:nowrap; }
 
-/* ─── SKELETON ───────────────────────────────────────── */
+/* ─── SKELETON / ERR ─────────────────────────────────── */
 .sk { background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);
   background-size:300% 100%; animation:shim 1.6s infinite;
   border-radius:5px; height:12px; margin:7px 0; }
 @keyframes shim { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 
-.err { font-family:var(--mono); font-size:9px; color:#ff6060; padding:10px;
+.err { font-family:var(--mono); font-size:11px; color:#ff8080; padding:10px 12px;
   background:rgba(255,60,60,0.06); border:1px solid rgba(255,60,60,0.18);
   border-radius:8px; line-height:1.6; }
+.note { font-family:var(--mono); font-size:11px; color:var(--yellow); padding:8px 12px; margin-top:8px;
+  background:rgba(245,200,66,0.06); border:1px solid rgba(245,200,66,0.18); border-radius:8px; line-height:1.5; }
 
 /* ─── MOBILE NAV ─────────────────────────────────────── */
 #mob-nav {
@@ -269,35 +348,26 @@ header {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border-top: 1px solid rgba(80,140,255,0.2);
-  padding: 8px 0 calc(8px + var(--sab));
+  padding: 6px 0 calc(6px + var(--sab));
 }
-
 .nav-tabs { display:flex; justify-content:space-around; }
-
 .ntab { display:flex; flex-direction:column; align-items:center; gap:3px;
   background:none; border:none; color:var(--muted);
-  font-family:var(--mono); font-size:8px; letter-spacing:0.1em;
-  text-transform:uppercase; padding:6px 20px; cursor:pointer;
-  -webkit-tap-highlight-color:transparent; transition:color .18s; }
+  font-family:var(--mono); font-size:10px; letter-spacing:0.08em;
+  text-transform:uppercase; padding:6px 20px; cursor:pointer; transition:color .18s; }
 .ntab.on { color:var(--blue); }
 .ntab-icon { font-size:22px; line-height:1; }
 
 /* ─── RESPONSIVE ─────────────────────────────────────── */
-
-/* Tablet */
 @media (max-width:1080px) and (min-width:769px) {
-  .grid { grid-template-columns: 1fr 1fr; }
-  #card-iss { grid-column: 1/3; }
-  .map-wrap { aspect-ratio:21/9; }
-  .iss-grid { grid-template-columns:repeat(4,1fr); }
-  .crew-list { flex-direction:row; flex-wrap:wrap; }
-  .crew-item { flex:1; min-width:140px; }
+  .grid { grid-template-columns: minmax(0,1fr); grid-template-areas: "next" "iss" "list"; }
+  #card-iss { position:relative; }
+  .hero { grid-template-columns: 1fr; }
 }
 
-/* Mobile */
 @media (max-width:768px) {
-  header { padding: 12px 16px 10px; }
-  #utc-clock { display: none; }
+  header { padding: 10px 16px 8px; }
+  #local-clock { display:none; }
   .wordmark { font-size: 24px; }
 
   .stat-strip { grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
@@ -305,26 +375,29 @@ header {
   .stat-tile { padding:11px 13px; }
 
   .grid { display:block; }
-
-  /* Mobile: one panel at a time */
   .card { display:none; }
   .card.show { display:flex; }
-
+  #card-iss { position:relative; }
   #mob-nav { display:block; }
 
-  /* No internal scrolling on mobile — let #scroller handle it */
-  .list-scroll { max-height:none; overflow:visible; }
+  .hero { grid-template-columns:1fr; gap:14px; padding:16px; }
+  .hero-name { font-size:32px; }
+  .cd-n { font-size:30px; }
+  .hero-queue { grid-template-columns:1fr; }
+  .hq { border-right:none; border-bottom:1px solid var(--border); padding:10px 16px; }
+  .hq:last-child { border-bottom:none; }
 
-  .map-wrap { aspect-ratio:16/9; }
-  .iss-grid { gap:6px; }
+  .card { padding:16px; }
+  #card-next { padding:0; }
+  .lrow { grid-template-columns:48px minmax(0,1fr) auto; gap:10px; padding:10px 4px; }
+  .ldate-a { font-size:19px; }
+  .ldet { padding:4px 12px 10px; grid-template-columns:1fr; }
+  .lright .bdg { display:none; }
 }
 
-/* Large desktop */
 @media (min-width:769px) {
   .card { display:flex !important; }
   #mob-nav { display:none !important; }
-  .list-scroll { max-height:400px; }
-  #card-iss { grid-column:3; grid-row:1/3; }
 }
 </style>
 </head>
@@ -339,44 +412,73 @@ header {
       <div class="wordmark-sub">Space Mission Dashboard</div>
     </div>
     <div class="header-right">
-      <div class="live-pill"><div class="live-dot"></div>LIVE</div>
-      <div id="utc-clock"></div>
+      <div class="live-pill" id="live-pill" title=""><div class="live-dot"></div><span id="live-txt">LIVE</span></div>
+      <div>
+        <div id="utc-clock"></div>
+        <div id="local-clock"></div>
+      </div>
     </div>
   </header>
 
   <div id="scroller">
+   <div class="wrap">
     <!-- STATS -->
     <div class="stat-strip">
-      <div class="stat-tile"><div class="stat-n" id="s-up">—</div><div class="stat-l">Upcoming Launches</div></div>
-      <div class="stat-tile"><div class="stat-n" id="s-alt">—</div><div class="stat-l">ISS Altitude km</div></div>
-      <div class="stat-tile"><div class="stat-n" id="s-crew">—</div><div class="stat-l">People in Space</div></div>
-      <div class="stat-tile"><div class="stat-n" id="s-spd">—</div><div class="stat-l">ISS Speed km/h</div></div>
+      <div class="stat-tile"><div class="stat-n" id="s-up">—</div><div class="stat-l">Upcoming launches</div></div>
+      <div class="stat-tile"><div class="stat-n" id="s-week">—</div><div class="stat-l">Next 7 days</div></div>
+      <div class="stat-tile"><div class="stat-n" id="s-crew">—</div><div class="stat-l">People in space</div></div>
+      <div class="stat-tile"><div class="stat-n" id="s-spd">—</div><div class="stat-l">ISS speed km/h</div></div>
     </div>
 
-    <!-- GRID -->
     <div class="grid">
 
       <!-- NEXT LAUNCH -->
       <div class="card show" id="card-next">
-        <div class="eyebrow">Next US Launch</div>
-        <div class="card-title" id="next-name">Loading…</div>
-        <div class="cd-row">
-          <div class="cd-unit"><span class="cd-n" id="cd-d">--</span><span class="cd-l">Days</span></div>
-          <div class="cd-unit"><span class="cd-n" id="cd-h">--</span><span class="cd-l">Hrs</span></div>
-          <div class="cd-unit"><span class="cd-n" id="cd-m">--</span><span class="cd-l">Min</span></div>
-          <div class="cd-unit"><span class="cd-n" id="cd-s">--</span><span class="cd-l">Sec</span></div>
+        <div class="hero-bg" id="hero-bg"></div>
+        <div class="hero">
+          <div>
+            <div class="card-head">
+              <div class="eyebrow">Next Launch</div>
+              <div class="scope" id="scope">
+                <button data-scope="all">ALL</button><button data-scope="us">USA</button>
+              </div>
+            </div>
+            <div class="hero-veh" id="next-veh">&nbsp;</div>
+            <div class="hero-name" id="next-name">Loading…</div>
+            <div class="hero-meta" id="next-meta"></div>
+            <div class="cd-row">
+              <div class="cd-unit"><span class="cd-n" id="cd-d">--</span><span class="cd-l">Days</span></div>
+              <div class="cd-unit"><span class="cd-n" id="cd-h">--</span><span class="cd-l">Hrs</span></div>
+              <div class="cd-unit"><span class="cd-n" id="cd-m">--</span><span class="cd-l">Min</span></div>
+              <div class="cd-unit"><span class="cd-n" id="cd-s">--</span><span class="cd-l">Sec</span></div>
+            </div>
+            <div class="cd-note" id="cd-note"></div>
+          </div>
+          <div id="next-det">
+            <div class="sk"></div><div class="sk" style="width:75%"></div>
+            <div class="sk" style="width:85%"></div><div class="sk" style="width:60%"></div>
+          </div>
         </div>
-        <div id="next-det">
-          <div class="sk"></div><div class="sk" style="width:75%"></div>
-          <div class="sk" style="width:85%"></div><div class="sk" style="width:60%"></div>
-        </div>
+        <div class="hero-queue" id="hero-queue"></div>
       </div>
 
-      <!-- LAUNCH LIST -->
+      <!-- SCHEDULE -->
       <div class="card" id="card-list">
-        <div class="eyebrow">Mission Schedule</div>
-        <div class="card-title">Upcoming Launches</div>
-        <div class="list-scroll" id="list-body">
+        <div class="card-head">
+          <div>
+            <div class="eyebrow">Mission Schedule</div>
+            <div class="card-title">All Upcoming Launches</div>
+          </div>
+          <div class="list-meta" id="list-meta"></div>
+        </div>
+        <div class="toolbar">
+          <label class="search">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input id="q" type="search" placeholder="Search mission, rocket, provider, site…" autocomplete="off">
+          </label>
+          <div class="chips" id="chips"></div>
+        </div>
+        <div id="list-body">
           <div class="sk"></div><div class="sk" style="width:80%"></div>
           <div class="sk"></div><div class="sk" style="width:65%"></div>
         </div>
@@ -385,290 +487,551 @@ header {
       <!-- ISS -->
       <div class="card" id="card-iss">
         <div class="eyebrow">Live Position</div>
-        <div class="card-title">Space Station</div>
+        <div class="card-title">International Space Station</div>
         <div class="map-wrap">
-          <svg id="iss-svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid meet">
-            <rect width="400" height="220" fill="#040b1c"/>
+          <svg id="iss-svg" viewBox="0 0 400 225" preserveAspectRatio="xMidYMid slice">
+            <rect width="400" height="225" fill="#040b1c"/>
             <g id="land"></g>
-            <line x1="0" y1="110" x2="400" y2="110" stroke="rgba(77,159,255,0.07)" stroke-width=".5"/>
-            <line x1="200" y1="0" x2="200" y2="220" stroke="rgba(77,159,255,0.07)" stroke-width=".5"/>
-            <line x1="0" y1="55" x2="400" y2="55" stroke="rgba(77,159,255,0.04)" stroke-width=".5" stroke-dasharray="2,4"/>
-            <line x1="0" y1="165" x2="400" y2="165" stroke="rgba(77,159,255,0.04)" stroke-width=".5" stroke-dasharray="2,4"/>
-            <polyline id="iss-track" points="" stroke="rgba(255,108,54,0.3)" stroke-width="1" fill="none" stroke-dasharray="2,3"/>
+            <line x1="0" y1="112.5" x2="400" y2="112.5" stroke="rgba(77,159,255,0.08)" stroke-width=".5"/>
+            <line x1="200" y1="0" x2="200" y2="225" stroke="rgba(77,159,255,0.08)" stroke-width=".5"/>
+            <line x1="0" y1="48.75" x2="400" y2="48.75" stroke="rgba(77,159,255,0.05)" stroke-width=".5" stroke-dasharray="2,4"/>
+            <line x1="0" y1="176.25" x2="400" y2="176.25" stroke="rgba(77,159,255,0.05)" stroke-width=".5" stroke-dasharray="2,4"/>
+            <path id="iss-track" d="" stroke="rgba(255,108,54,0.45)" stroke-width="1" fill="none" stroke-dasharray="2,3"/>
             <defs>
               <filter id="oglow" x="-100%" y="-100%" width="300%" height="300%">
                 <feGaussianBlur stdDeviation="2.5" result="b"/>
                 <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
               </filter>
             </defs>
-            <circle id="iss-dot" cx="200" cy="110" r="5" fill="#ff6c36" filter="url(#oglow)"/>
-            <text x="5" y="107" fill="rgba(77,159,255,0.22)" font-size="6" font-family="monospace">EQ</text>
-            <text x="5" y="53" fill="rgba(77,159,255,0.18)" font-size="5.5" font-family="monospace">+51°</text>
-            <text x="5" y="169" fill="rgba(77,159,255,0.18)" font-size="5.5" font-family="monospace">-51°</text>
+            <circle id="iss-ring" cx="-20" cy="-20" r="9" fill="none" stroke="rgba(255,108,54,0.4)" stroke-width="1"/>
+            <circle id="iss-dot" cx="-20" cy="-20" r="4.5" fill="#ff6c36" filter="url(#oglow)"/>
+            <text x="5" y="110" fill="rgba(77,159,255,0.25)" font-size="6" font-family="monospace">EQ</text>
+            <text x="5" y="46.5" fill="rgba(77,159,255,0.2)" font-size="5.5" font-family="monospace">+51.6°</text>
+            <text x="5" y="182" fill="rgba(77,159,255,0.2)" font-size="5.5" font-family="monospace">-51.6°</text>
           </svg>
         </div>
         <div class="iss-grid">
-          <div class="iss-tile"><div class="iss-tl">Latitude</div><div class="iss-tv" id="iss-lat">—<span class="iss-tu">°</span></div></div>
-          <div class="iss-tile"><div class="iss-tl">Longitude</div><div class="iss-tv" id="iss-lon">—<span class="iss-tu">°</span></div></div>
-          <div class="iss-tile"><div class="iss-tl">Altitude</div><div class="iss-tv" id="iss-alt">—<span class="iss-tu">km</span></div></div>
-          <div class="iss-tile"><div class="iss-tl">Speed</div><div class="iss-tv" id="iss-spd">—<span class="iss-tu">km/s</span></div></div>
+          <div class="iss-tile"><div class="iss-tl">Latitude</div><div class="iss-tv" id="iss-lat">—</div></div>
+          <div class="iss-tile"><div class="iss-tl">Longitude</div><div class="iss-tv" id="iss-lon">—</div></div>
+          <div class="iss-tile"><div class="iss-tl">Altitude</div><div class="iss-tv" id="iss-alt">—</div></div>
+          <div class="iss-tile"><div class="iss-tl">Velocity</div><div class="iss-tv" id="iss-spd">—</div></div>
         </div>
-        <div class="crew-ttl">Current Crew</div>
-        <div class="crew-list" id="crew-list">
-          <div class="sk" style="height:34px;border-radius:8px"></div>
-          <div class="sk" style="height:34px;border-radius:8px;width:80%"></div>
+        <div id="crew-list">
+          <div class="sk" style="height:38px;border-radius:8px"></div>
+          <div class="sk" style="height:38px;border-radius:8px;width:80%"></div>
         </div>
       </div>
 
     </div><!-- /grid -->
+   </div>
   </div><!-- /scroller -->
 
   <!-- MOBILE BOTTOM NAV -->
   <nav id="mob-nav">
     <div class="nav-tabs">
-      <button class="ntab on" data-id="card-next" onclick="switchTab(this)">
-        <span class="ntab-icon">🚀</span>Next
-      </button>
-      <button class="ntab" data-id="card-list" onclick="switchTab(this)">
-        <span class="ntab-icon">📋</span>Schedule
-      </button>
-      <button class="ntab" data-id="card-iss" onclick="switchTab(this)">
-        <span class="ntab-icon">🛸</span>ISS
-      </button>
+      <button class="ntab on" data-id="card-next"><span class="ntab-icon">🚀</span>Next</button>
+      <button class="ntab" data-id="card-list"><span class="ntab-icon">📋</span>Schedule</button>
+      <button class="ntab" data-id="card-iss"><span class="ntab-icon">🛰️</span>ISS</button>
     </div>
   </nav>
 </div>
 
 <script>
+/* ── HELPERS ───────────────────────────────────────── */
+const $ = id => document.getElementById(id);
+const pad2 = n => String(n).padStart(2,'0');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const MO = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const store = {
+  get(k){ try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k,v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+
 /* ── MOBILE TAB SWITCH ─────────────────────────────── */
-function switchTab(btn) {
+document.querySelectorAll('.ntab').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.card').forEach(c => c.classList.remove('show'));
   document.querySelectorAll('.ntab').forEach(b => b.classList.remove('on'));
-  document.getElementById(btn.dataset.id).classList.add('show');
+  $(btn.dataset.id).classList.add('show');
   btn.classList.add('on');
-  document.getElementById('scroller').scrollTop = 0;
-}
+  $('scroller').scrollTop = 0;
+}));
+function showTab(id){ document.querySelector(`.ntab[data-id="${id}"]`)?.click(); }
 
 /* ── STARFIELD ─────────────────────────────────────── */
 (function(){
-  const c=document.getElementById('stars'), ctx=c.getContext('2d');
+  const c=$('stars'), ctx=c.getContext('2d');
   let W,H,S=[];
-  function resize(){ W=c.width=innerWidth; H=c.height=innerHeight; }
   function init(){
-    resize();
-    S=Array.from({length:180},()=>({
-      x:Math.random()*W, y:Math.random()*H,
-      r:Math.random()*1.1+0.2,
-      ph:Math.random()*Math.PI*2,
-      sp:Math.random()*0.4+0.1
+    const dpr=Math.min(devicePixelRatio||1,2);
+    W=innerWidth; H=innerHeight;
+    c.width=W*dpr; c.height=H*dpr; c.style.width=W+'px'; c.style.height=H+'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    S=Array.from({length:Math.round(W*H/7000)},()=>({
+      x:Math.random()*W, y:Math.random()*H, r:Math.random()*1.1+0.2,
+      ph:Math.random()*Math.PI*2, sp:Math.random()*0.4+0.1
     }));
   }
+  let last=0;
   function draw(t){
+    requestAnimationFrame(draw);
+    if(t-last<50) return;          // ~20fps is plenty for twinkle
+    last=t;
     ctx.clearRect(0,0,W,H);
-    S.forEach(s=>{
+    for(const s of S){
       const a=(Math.sin(s.ph+t*s.sp*.001)+1)/2;
       ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
       ctx.fillStyle=`rgba(180,210,255,${a*.6})`; ctx.fill();
-    });
-    requestAnimationFrame(draw);
+    }
   }
-  window.addEventListener('resize',init);
+  addEventListener('resize',init);
   init(); requestAnimationFrame(draw);
 })();
 
 /* ── CLOCK ─────────────────────────────────────────── */
 (function tick(){
-  const d=new Date(), p=n=>String(n).padStart(2,'0');
-  document.getElementById('utc-clock').textContent=
-    `${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:${p(d.getUTCSeconds())} UTC`;
-  setTimeout(tick,1000);
+  const d=new Date();
+  $('utc-clock').textContent=`${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}:${pad2(d.getUTCSeconds())} UTC`;
+  $('local-clock').textContent=d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit',timeZoneName:'short'});
+  setTimeout(tick,1000-d.getMilliseconds());
 })();
 
 /* ── WORLD MAP ─────────────────────────────────────── */
+const MW=400, MH=225;
+const mx = ln => (ln+180)*(MW/360);
+const my = lt => (90-lt)*(MH/180);
 (function(){
-  const W=400, H=220;
-  const p=(ln,lt)=>`${((ln+180)*(W/360)).toFixed(1)},${((90-lt)*(H/180)).toFixed(1)}`;
   const shapes=[
-    // North America
-    [[-168,72],[-130,72],[-95,72],[-80,75],[-65,68],[-52,60],[-55,47],[-68,44],[-76,35],[-80,26],[-88,30],[-97,26],[-110,32],[-118,32],[-124,38],[-125,50],[-112,50],[-100,50],[-90,48],[-82,42],[-75,45],[-67,47]],
-    [[-95,22],[-82,10],[-77,8],[-75,10],[-85,15],[-90,20]],
-    // South America
-    [[-80,12],[-62,12],[-48,0],[-35,-8],[-52,-34],[-68,-56],[-76,-52],[-70,-18],[-80,0]],
-    // Europe
+    [[-168,72],[-130,72],[-95,72],[-80,75],[-65,68],[-52,60],[-55,47],[-68,44],[-76,35],[-80,26],[-88,30],[-97,26],[-110,32],[-118,32],[-124,38],[-125,50],[-132,56],[-150,60],[-165,62]],
+    [[-97,26],[-95,22],[-88,21],[-87,16],[-82,10],[-77,8],[-80,7],[-86,12],[-92,15],[-105,20],[-110,24],[-112,30]],
+    [[-80,12],[-62,12],[-48,0],[-35,-8],[-40,-22],[-52,-34],[-68,-56],[-76,-52],[-70,-18],[-80,0]],
     [[-10,36],[0,44],[15,44],[30,46],[28,55],[20,60],[10,58],[0,50],[-5,44]],
-    [[5,58],[10,58],[22,70],[18,72],[15,70],[8,63]],
+    [[5,58],[10,58],[22,70],[30,70],[18,72],[15,70],[8,63]],
     [[-6,52],[-2,52],[-2,50],[-6,50]],
     [[-8,52],[-4,56],[0,58],[-4,60],[-6,56]],
-    // Africa
-    [[-18,16],[0,16],[42,12],[52,12],[42,-12],[34,-34],[18,-36],[0,-34],[-18,-28],[-18,0]],
-    // Middle East
+    [[-18,16],[-10,35],[10,37],[32,31],[42,12],[52,12],[42,-12],[34,-34],[18,-36],[12,-18],[8,4],[-8,4],[-18,10]],
     [[36,36],[42,37],[56,24],[58,22],[50,14],[44,12],[38,14],[36,22]],
-    // Russia/Asia
-    [[30,60],[60,68],[90,72],[120,74],[140,70],[160,68],[170,62],[165,50],[140,46],[120,42],[90,40],[72,42],[60,46],[50,50],[36,48],[30,55]],
-    // India
+    [[30,60],[60,68],[90,72],[120,74],[140,70],[160,68],[180,66],[170,62],[165,50],[140,46],[120,42],[90,40],[72,42],[60,46],[50,50],[36,48],[30,55]],
     [[68,36],[82,28],[88,22],[80,10],[72,22],[68,30]],
-    // SE Asia
-    [[100,22],[108,20],[120,12],[115,4],[105,4],[100,10],[98,16]],
-    // East Asia
+    [[100,22],[108,20],[106,12],[102,4],[98,10],[98,16]],
     [[120,52],[130,45],[128,34],[122,30],[110,20],[100,22],[98,26],[90,28],[80,34],[88,48],[110,54]],
-    // Japan
     [[130,33],[136,34],[142,40],[142,44],[136,44],[132,34]],
-    // Australia
     [[114,-22],[124,-18],[136,-12],[142,-14],[150,-24],[152,-28],[148,-38],[138,-36],[128,-34],[118,-30],[114,-26]],
     [[172,-34],[176,-36],[178,-40],[174,-44],[172,-42],[170,-38]],
-    // Greenland
+    [[95,5],[105,-6],[120,-8],[140,-4],[150,-8],[140,-10],[118,-9],[104,-2]],
     [[-56,76],[-20,76],[-18,68],[-30,62],[-48,60],[-58,66]],
   ];
-  const g=document.getElementById('land');
-  const ns='http://www.w3.org/2000/svg';
+  const g=$('land'), ns='http://www.w3.org/2000/svg';
   shapes.forEach(pts=>{
     const el=document.createElementNS(ns,'polygon');
-    el.setAttribute('points', pts.map(([ln,lt])=>p(ln,lt)).join(' '));
-    el.setAttribute('fill','#0f1e3a');
-    el.setAttribute('stroke','#1a2e56');
-    el.setAttribute('stroke-width','0.5');
-    el.setAttribute('stroke-linejoin','round');
+    el.setAttribute('points', pts.map(([ln,lt])=>`${mx(ln).toFixed(1)},${my(lt).toFixed(1)}`).join(' '));
+    el.setAttribute('fill','#0f1e3a'); el.setAttribute('stroke','#1a2e56');
+    el.setAttribute('stroke-width','0.5'); el.setAttribute('stroke-linejoin','round');
     g.appendChild(el);
   });
 })();
 
 /* ── ISS ───────────────────────────────────────────── */
-let track=[];
+const track=store.get('orbital.isstrack')?.filter(p=>Date.now()-p[2]<95*60e3) || [];
 async function fetchISS(){
   try {
     const r=await fetch('https://api.wheretheiss.at/v1/satellites/25544');
+    if(!r.ok) return;
     const d=await r.json();
-    const lat=parseFloat(d.latitude), lon=parseFloat(d.longitude);
-    const alt=parseFloat(d.altitude).toFixed(1);
-    const spd=parseFloat(d.velocity/1000).toFixed(2);
-    const kmh=Math.round(parseFloat(d.velocity));
+    const lat=+d.latitude, lon=+d.longitude, alt=+d.altitude, kmh=+d.velocity;   // velocity is km/h
+    $('iss-lat').innerHTML=`${Math.abs(lat).toFixed(2)}<span class="iss-tu">°${lat>=0?'N':'S'}</span>`;
+    $('iss-lon').innerHTML=`${Math.abs(lon).toFixed(2)}<span class="iss-tu">°${lon>=0?'E':'W'}</span>`;
+    $('iss-alt').innerHTML=`${alt.toFixed(1)}<span class="iss-tu">km</span>`;
+    $('iss-spd').innerHTML=`${(kmh/3600).toFixed(2)}<span class="iss-tu">km/s</span>`;
+    $('s-spd').textContent=Math.round(kmh).toLocaleString();
 
-    document.getElementById('iss-lat').innerHTML=`${lat.toFixed(2)}<span class="iss-tu">°</span>`;
-    document.getElementById('iss-lon').innerHTML=`${lon.toFixed(2)}<span class="iss-tu">°</span>`;
-    document.getElementById('iss-alt').innerHTML=`${alt}<span class="iss-tu">km</span>`;
-    document.getElementById('iss-spd').innerHTML=`${spd}<span class="iss-tu">km/s</span>`;
-    document.getElementById('s-alt').textContent=alt;
-    document.getElementById('s-spd').textContent=kmh;
-
-    const x=((lon+180)*(400/360)).toFixed(1);
-    const y=((90-lat)*(220/180)).toFixed(1);
-    document.getElementById('iss-dot').setAttribute('cx',x);
-    document.getElementById('iss-dot').setAttribute('cy',y);
-    track.push([x,y]);
-    if(track.length>90) track.shift();
-    document.getElementById('iss-track').setAttribute('points',
-      track.map(p=>`${p[0]},${p[1]}`).join(' '));
+    const x=mx(lon), y=my(lat);
+    for(const id of ['iss-dot','iss-ring']){ $(id).setAttribute('cx',x.toFixed(1)); $(id).setAttribute('cy',y.toFixed(1)); }
+    track.push([x,y,Date.now()]);
+    while(track.length && Date.now()-track[0][2]>95*60e3) track.shift();   // ~one orbit
+    store.set('orbital.isstrack', track);
+    // break the line where it wraps around the antimeridian
+    $('iss-track').setAttribute('d', track.map((p,i)=>
+      `${i===0||Math.abs(p[0]-track[i-1][0])>MW/2?'M':'L'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(''));
   } catch(e){}
 }
 
 async function fetchCrew(){
   try {
-    const r=await fetch('https://api.open-notify.org/astros.json');
+    const r=await fetch('https://corquaid.github.io/international-space-station-APIs/JSON/people-in-space.json');
+    if(!r.ok) throw 0;
     const d=await r.json();
-    document.getElementById('s-crew').textContent=d.number;
-    document.getElementById('crew-list').innerHTML=d.people.map(p=>`
-      <div class="crew-item">
-        <div class="crew-av">${p.name.charAt(0)}</div>
-        <span class="crew-name">${p.name}</span>
-        <span class="crew-craft">${p.craft}</span>
+    $('s-crew').textContent=d.number ?? d.people.length;
+    const bySc={};
+    d.people.forEach(p=>{ const k=p.iss?'ISS':(p.spacecraft||'Other'); (bySc[k]=bySc[k]||[]).push(p); });
+    const title = k => k==='ISS' ? `ISS${d.iss_expedition?` · Expedition ${d.iss_expedition}`:''}` : k==='Shenzhou' ? 'Tiangong' : /shenzhou/i.test(k) ? `Tiangong · ${k}` : k;
+    $('crew-list').innerHTML=Object.entries(bySc).map(([k,ps])=>`
+      <div class="crew-ttl"><span>${esc(title(k))}</span><span>${ps.length}</span></div>
+      <div class="crew-list">${ps.map(p=>`
+        <div class="crew-item">
+          <div class="crew-av">${p.image?`<img src="${esc(p.image)}" alt="" loading="lazy" onerror="this.remove()">`:''}${esc(p.name.charAt(0))}</div>
+          <span class="crew-name">${esc(p.name)}<small>${esc([p.agency,p.position].filter(Boolean).join(' · '))}</small></span>
+          <span class="crew-days">${p.days_in_space!=null?`${p.days_in_space} d`:''}${p.iss&&p.spacecraft?`<br>${esc(p.spacecraft)}`:''}</span>
+        </div>`).join('')}
       </div>`).join('');
   } catch(e){
-    document.getElementById('crew-list').innerHTML='<div class="err">Crew data unavailable.</div>';
+    $('crew-list').innerHTML='<div class="err">Crew data unavailable right now.</div>';
   }
 }
 
-/* ── LAUNCHES ──────────────────────────────────────── */
-function badge(ab){
-  const m={Go:'bdg-go',TBD:'bdg-tbd',TBC:'bdg-tbd','In Flight':'bdg-go',Success:'bdg-ok',Failure:'bdg-fail'};
-  return `<span class="bdg ${m[ab]||'bdg-tbd'}">${ab||'TBD'}</span>`;
+/* ── LAUNCH DATA ───────────────────────────────────── */
+// Launch Library 2 free tier allows 15 requests/hour. All ~370 upcoming launches
+// take ~4 pages, so results are cached and refreshed at most every 30 min.
+const LL_PROD='https://ll.thespacedevs.com/2.2.0/launch/upcoming/?mode=list&ordering=net&limit=100';
+const LL_DEV ='https://lldev.thespacedevs.com/2.2.0/launch/upcoming/?mode=list&ordering=net&limit=100';
+const CACHE_KEY='orbital.launches.v2', TTL=30*60e3;
+const FINE=new Set(['SEC','MIN','HR']);
+
+const COUNTRY_FIX = {
+  "People's Republic of China":'China', 'Republic of Kazakhstan':'Kazakhstan', 'Russian Federation':'Russia',
+  'Federative Republic of Brazil':'Brazil', 'Andøya Spaceport':'Norway', 'SaxaVord Spaceport':'UK',
+  'Etlaq Spaceport':'Oman', 'Haiyang Oriental Spaceport':'China', 'Sea Launch':'China',
+  'French Guiana':'Europe (Kourou)', 'Esrange Space Center':'Sweden', 'Bowen Orbital Spaceport':'Australia', 'Air launch to Suborbital flight':'Air launch', 'United Kingdom':'UK', 'USA':'USA'
+};
+function region(loc){
+  if(!loc) return 'Unknown';
+  const last=loc.split(', ').pop();
+  return COUNTRY_FIX[last] || last;
 }
 
-function fDate(iso){
-  if(!iso) return 'TBD';
+function normalize(l){
+  const [veh, ...rest] = (l.name||'').split(' | ');
+  return {
+    id: l.id,
+    name: rest.join(' | ') || l.mission || l.name || 'Unknown mission',
+    vehicle: rest.length ? veh : '',
+    provider: l.lsp_name || '',
+    mission: l.mission || '',
+    type: l.mission_type || '',
+    pad: l.pad || '',
+    location: l.location || '',
+    region: region(l.location),
+    status: l.status?.abbrev || 'TBD',
+    statusName: l.status?.name || '',
+    net: l.net,
+    t: Date.parse(l.net),
+    prec: l.net_precision?.abbrev || null,
+    wStart: l.window_start, wEnd: l.window_end,
+    image: l.image || '',
+    landing: l.landing, orbit: l.orbit
+  };
+}
+
+let launches=[], meta={updated:0, source:'', total:0, partial:false};
+
+async function fetchAll(base, offset=0){
+  let url=offset?`${base}&offset=${offset}`:base, out=[], total=0;
+  const progressive=!launches.length;
+  while(url){
+    const r=await fetch(url);
+    if(r.status===429) { const e=new Error('rate'); e.partial=out; e.total=total; throw e; }
+    if(!r.ok) { const e=new Error('http '+r.status); e.partial=out; e.total=total; throw e; }
+    const d=await r.json();
+    total=d.count; out=out.concat(d.results||[]);
+    url=d.next;
+    // paint progressively on the first uncached load
+    if(progressive && url) { apply(out.map(normalize), {updated:Date.now(), source:'live', total, partial:!!url}); }
+  }
+  return {results:out, total};
+}
+
+function apply(list, m){
+  launches=list; meta=m;
+  renderAll();
+}
+
+async function loadLaunches(force=false){
+  const cached=store.get(CACHE_KEY);
+  if(cached?.results?.length && !launches.length) apply(cached.results, {...cached.meta, source:cached.meta.source||'cache'});
+  if(!force && cached && Date.now()-cached.meta.updated < TTL) { scheduleNext(TTL-(Date.now()-cached.meta.updated)); return; }
+
   try {
-    const d=new Date(iso);
-    const mo=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const hr=d.getUTCHours(), mn=d.getUTCMinutes();
-    return `${mo[d.getUTCMonth()]} ${d.getUTCDate()}\n${String(hr).padStart(2,'0')}:${String(mn).padStart(2,'0')} UTC`;
-  } catch { return 'TBD'; }
+    const {results,total}=await fetchAll(LL_PROD);
+    const m={updated:Date.now(), source:'live', total, partial:false};
+    const list=results.map(normalize);
+    store.set(CACHE_KEY,{results:list, meta:m});
+    apply(list,m);
+    scheduleNext(TTL);
+  } catch(e){
+    const got=(e.partial||[]).map(normalize);
+    const old=cached?.results||[];
+    if(got.length){
+      // merge fresh pages with cached tail so the list stays complete
+      const lastT=got[got.length-1].t, ids=new Set(got.map(x=>x.id));
+      let merged=got.concat(old.filter(x=>x.t>lastT && !ids.has(x.id)));
+      if(merged.length<e.total){
+        // no cached tail: fetch the remaining pages from the dev mirror
+        try { const {results}=await fetchAll(LL_DEV, got.length);
+          merged=got.concat(results.map(normalize).filter(x=>!ids.has(x.id))); } catch {}
+      }
+      const m={updated:Date.now(), source:'live', total:e.total, partial: merged.length<e.total};
+      if(!m.partial) store.set(CACHE_KEY,{results:merged, meta:m});
+      apply(merged,m);
+    } else if(old.length){
+      apply(old,{...cached.meta, source:'cache', rateLimited:true});
+    } else {
+      // last resort: dev mirror (not rate limited, may lag a little)
+      try {
+        const {results,total}=await fetchAll(LL_DEV);
+        apply(results.map(normalize),{updated:Date.now(), source:'mirror', total, partial:false});
+      } catch(e2){
+        const got2=(e2.partial||[]).map(normalize);
+        if(got2.length) apply(got2,{updated:Date.now(), source:'mirror', total:e2.total, partial:true});
+        else showLaunchError();
+      }
+    }
+    scheduleNext(10*60e3);
+  }
+}
+let nextTimer=null;
+function scheduleNext(ms){ clearTimeout(nextTimer); nextTimer=setTimeout(()=>loadLaunches(), Math.max(ms, 60e3)); }
+
+function showLaunchError(){
+  $('next-name').textContent='Data unavailable';
+  $('next-det').innerHTML='<div class="err">Launch Library is rate-limiting this network (15 requests/hour on the free tier). Data will load automatically when the limit resets.</div>';
+  $('list-body').innerHTML='<div class="err">Launch schedule unavailable. Retrying in 10 minutes.</div>';
+  setPill();
 }
 
-let cdInterval=null;
-function startCD(iso){
-  if(cdInterval) clearInterval(cdInterval);
+/* ── FORMATTING ────────────────────────────────────── */
+function badge(l){
+  const map={Go:['bdg-go','GO'],TBC:['bdg-tbc','TBC'],TBD:['bdg-tbd','TBD'],Hold:['bdg-hold','HOLD'],
+    'In Flight':['bdg-fly','IN FLIGHT'],Success:['bdg-go','SUCCESS'],Failure:['bdg-fail','FAILURE'],'Partial Failure':['bdg-fail','PARTIAL']};
+  const [c,t]=map[l.status]||['bdg-tbd',l.status||'TBD'];
+  return `<span class="bdg ${c}" title="${esc(l.statusName)}">${esc(t)}</span>`;
+}
+
+// Label for the launch date, honouring how precise the date actually is
+function when(l){
+  const d=new Date(l.t);
+  if(isNaN(d)) return {a:'TBD', b:'', full:'Date TBD', fuzzy:true};
+  const y=d.getUTCFullYear(), p=l.prec;
+  if(!p || FINE.has(p)) {
+    const hh=`${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}`;
+    return {a:d.getUTCDate(), b:MO[d.getUTCMonth()], time:(p==='HR'?'~':'')+hh+' UTC',
+      full:`${MO[d.getUTCMonth()]} ${d.getUTCDate()}, ${y} · ${p==='HR'?'~':''}${hh} UTC`,
+      local:d.toLocaleString([], {weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'})};
+  }
+  if(p==='DAY') return {a:d.getUTCDate(), b:MO[d.getUTCMonth()], time:'Time TBD', full:`${MO[d.getUTCMonth()]} ${d.getUTCDate()}, ${y} · time TBD`};
+  if(p==='M')   return {a:MO[d.getUTCMonth()], b:String(y), time:'NET '+MO[d.getUTCMonth()], full:`NET ${MONTH[d.getUTCMonth()]} ${y}`, fuzzy:true};
+  if(p==='Y')   return {a:String(y), b:'year', time:'NET '+y, full:`NET ${y}`, fuzzy:true};
+  if(p==='FY')  return {a:'FY', b:String(y), time:'NET FY'+y, full:`NET fiscal year ${y}`, fuzzy:true};
+  if(p==='DEC') return {a:`${Math.floor(y/10)*10}s`, b:'decade', time:`NET ${Math.floor(y/10)*10}s`, full:`NET ${Math.floor(y/10)*10}s`, fuzzy:true};
+  if(/^[QH]\d$/.test(p)) return {a:p, b:String(y), time:`NET ${p}`, full:`NET ${p} ${y}`, fuzzy:true};
+  if(p==='W')   return {a:d.getUTCDate(), b:MO[d.getUTCMonth()], time:'Week of', full:`Week of ${MO[d.getUTCMonth()]} ${d.getUTCDate()}, ${y}`, fuzzy:true};
+  return {a:MO[d.getUTCMonth()], b:String(y), time:`NET ${MO[d.getUTCMonth()]}`, full:`NET ${MONTH[d.getUTCMonth()]} ${y}`, fuzzy:true};
+}
+
+function rel(t){
+  const s=(t-Date.now())/1000, a=Math.abs(s);
+  const f = a<3600 ? `${Math.round(a/60)}m` : a<86400 ? `${Math.floor(a/3600)}h ${Math.round(a%3600/60)}m`
+          : a<86400*14 ? `${Math.floor(a/86400)}d ${Math.floor(a%86400/3600)}h` : a<86400*60 ? `${Math.round(a/86400)} days` : `${Math.round(a/86400/30.4)} mo`;
+  return s>=0 ? `in ${f}` : `${f} ago`;
+}
+
+function groupKey(l){
+  const d=new Date(l.t);
+  if(isNaN(d)) return 'Date TBD';
+  const p=l.prec, y=d.getUTCFullYear();
+  if(!p || FINE.has(p) || p==='DAY' || p==='W') return `${MONTH[d.getUTCMonth()]} ${y}`;
+  if(p==='M') return `${MONTH[d.getUTCMonth()]} ${y} · Day TBD`;
+  if(/^[QH]\d$/.test(p)) return `${p} ${y} · Date TBD`;
+  if(p==='Y' || p==='FY') return `${y} · Date TBD`;
+  if(p==='DEC') return `${Math.floor(y/10)*10}s · Date TBD`;
+  return `${MONTH[d.getUTCMonth()]} ${y} · Date TBD`;
+}
+
+/* ── RENDER: STATUS PILL ───────────────────────────── */
+function setPill(){
+  const pill=$('live-pill'), txt=$('live-txt');
+  const ago=meta.updated?Math.round((Date.now()-meta.updated)/60e3):null;
+  const stale = meta.source!=='live' || meta.partial || meta.rateLimited;
+  pill.classList.toggle('stale', !!stale || !meta.updated);
+  txt.textContent = !meta.updated ? 'OFFLINE' : meta.source==='mirror' ? 'MIRROR' : meta.rateLimited ? 'CACHED' : 'LIVE';
+  pill.title = meta.updated ? `Launch data updated ${ago} min ago` : 'No launch data';
+}
+
+/* ── RENDER: NEXT LAUNCH ───────────────────────────── */
+let scope=store.get('orbital.scope')||'all', cdTimer=null, heroId=null;
+document.querySelectorAll('#scope button').forEach(b=>{
+  b.classList.toggle('on', b.dataset.scope===scope);
+  b.addEventListener('click',()=>{
+    scope=b.dataset.scope; store.set('orbital.scope',scope);
+    document.querySelectorAll('#scope button').forEach(x=>x.classList.toggle('on',x===b));
+    renderNext();
+  });
+});
+
+function upcoming(){
+  // the API keeps recently launched missions for a while; hide ones well past T-0
+  const now=Date.now();
+  return launches.filter(l => l.status==='In Flight' ? now-l.t<3*3600e3 : isNaN(l.t) || l.t>now-3600e3 || l.status==='Hold');
+}
+
+function renderNext(){
+  const pool=upcoming().filter(l=>scope==='all'||l.region==='USA');
+  const l=pool.find(x=>x.t>Date.now()-3600e3) || pool[0];
+  if(!l) return;
+  heroId=l.id;
+  const w=when(l);
+  $('next-veh').textContent=[l.vehicle, l.provider].filter(Boolean).join(' · ') || ' ';
+  $('next-name').textContent=l.name;
+  $('next-meta').innerHTML=`${badge(l)}${l.type?`<span class="chip-s">${esc(l.type)}</span>`:''}${l.orbit?`<span class="chip-s">${esc(l.orbit)}</span>`:''}`;
+  const bg=$('hero-bg');
+  if(l.image){ const img=new Image(); img.onload=()=>{ bg.style.backgroundImage=`url("${l.image}")`; bg.classList.add('on'); }; img.src=l.image; }
+  else bg.classList.remove('on');
+
+  const windowTxt = l.wStart && l.wEnd && l.wStart!==l.wEnd && FINE.has(l.prec)
+    ? (()=>{ const a=new Date(l.wStart), b=new Date(l.wEnd), mins=Math.round((b-a)/60e3);
+        return `${pad2(a.getUTCHours())}:${pad2(a.getUTCMinutes())}–${pad2(b.getUTCHours())}:${pad2(b.getUTCMinutes())} UTC<small>${mins>=120?Math.round(mins/60)+' hr':mins+' min'} window</small>`; })()
+    : FINE.has(l.prec) ? 'Instantaneous' : '—';
+
+  $('next-det').innerHTML=`
+    <div class="drow"><span class="dk">T-Zero</span><span class="dv">${esc(w.full)}${w.local?`<small>${esc(w.local)}</small>`:''}</span></div>
+    <div class="drow"><span class="dk">Window</span><span class="dv">${windowTxt}</span></div>
+    <div class="drow"><span class="dk">Provider</span><span class="dv">${esc(l.provider||'—')}</span></div>
+    <div class="drow"><span class="dk">Vehicle</span><span class="dv">${esc(l.vehicle||'—')}</span></div>
+    <div class="drow"><span class="dk">Pad</span><span class="dv">${esc(l.pad||'—')}<small>${esc(l.location)}</small></span></div>
+    ${l.landing?`<div class="drow"><span class="dk">Landing</span><span class="dv">${esc(l.landing)}</span></div>`:''}`;
+
+  const idx=pool.indexOf(l);
+  $('hero-queue').innerHTML=pool.slice(idx+1, idx+4).map(q=>{
+    const qw=when(q);
+    return `<div class="hq" data-id="${esc(q.id)}">
+      <div class="hq-t">${esc(qw.fuzzy?qw.full:`${qw.b} ${qw.a} · ${rel(q.t)}`)}</div>
+      <div class="hq-n">${esc(q.name)}</div>
+      <div class="hq-v">${esc([q.vehicle,q.region].filter(Boolean).join(' · '))}</div></div>`;
+  }).join('');
+  $('hero-queue').querySelectorAll('.hq').forEach(el=>el.addEventListener('click',()=>revealInList(el.dataset.id)));
+
+  startCD(l);
+}
+
+function startCD(l){
+  clearInterval(cdTimer);
+  const ids=['cd-d','cd-h','cd-m','cd-s'];
+  const precise=!l.prec||FINE.has(l.prec);
   function tick(){
-    const diff=new Date(iso)-Date.now();
-    if(diff<=0){ ['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='00'); return; }
-    const d=Math.floor(diff/86400000);
-    const h=Math.floor(diff%86400000/3600000);
-    const m=Math.floor(diff%3600000/60000);
-    const s=Math.floor(diff%60000/1000);
-    const p=n=>String(n).padStart(2,'0');
-    document.getElementById('cd-d').textContent=p(d);
-    document.getElementById('cd-h').textContent=p(h);
-    document.getElementById('cd-m').textContent=p(m);
-    document.getElementById('cd-s').textContent=p(s);
+    const diff=l.t-Date.now();
+    if(isNaN(diff)){ ids.forEach(id=>$(id).textContent='--'); return; }
+    const a=Math.abs(diff);
+    const v=[Math.floor(a/86400e3), Math.floor(a%86400e3/3600e3), Math.floor(a%3600e3/60e3), Math.floor(a%60e3/1000)];
+    ids.forEach((id,i)=>$(id).textContent=pad2(v[i]));
+    $('cd-note').innerHTML = diff<0 ? `<b>T+</b> · liftoff was scheduled ${esc(rel(l.t))} — awaiting confirmation`
+      : !precise ? `Approximate — launch date is <b>${esc(when(l).full)}</b>`
+      : l.status==='Go' ? 'Go for launch' : `Status: <b>${esc(l.statusName||l.status)}</b>`;
   }
-  tick(); cdInterval=setInterval(tick,1000);
+  tick(); cdTimer=setInterval(tick,1000);
 }
 
-function renderNext(l){
-  document.getElementById('next-name').textContent=l.name||'Unknown Mission';
-  startCD(l.net);
-  document.getElementById('next-det').innerHTML=`
-    <div class="drow"><span class="dk">Status</span><span class="dv">${badge(l.status?.abbrev)}</span></div>
-    <div class="drow"><span class="dk">T-Zero</span><span class="dv" style="white-space:pre-line;font-size:11px">${fDate(l.net)}</span></div>
-    <div class="drow"><span class="dk">Provider</span><span class="dv">${l.launch_service_provider?.name||'—'}</span></div>
-    <div class="drow"><span class="dk">Vehicle</span><span class="dv">${l.rocket?.configuration?.name||'—'}</span></div>
-    <div class="drow"><span class="dk">Pad</span><span class="dv">${l.pad?.name||'—'}</span></div>
-    <div class="drow"><span class="dk">Mission</span><span class="dv">${l.mission?.name||l.name||'—'}</span></div>
-  `;
+/* ── RENDER: SCHEDULE ──────────────────────────────── */
+let filt={q:'', region:store.get('orbital.region')||'All', status:'all'}, openId=null, shown=150;
+
+function renderChips(){
+  const pool=upcoming(), counts={};
+  pool.forEach(l=>counts[l.region]=(counts[l.region]||0)+1);
+  const regions=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  if(filt.region!=='All' && !counts[filt.region]) filt.region='All';
+  const goN=pool.filter(l=>l.status==='Go'||l.status==='TBC').length;
+  $('chips').innerHTML=
+    `<button class="chip ${filt.region==='All'?'on':''}" data-r="All">All<span class="n">${pool.length}</span></button>`+
+    regions.map(([r,n])=>`<button class="chip ${filt.region===r?'on':''}" data-r="${esc(r)}">${esc(r)}<span class="n">${n}</span></button>`).join('')+
+    `<span class="chip-sep"></span><button class="chip ${filt.status==='firm'?'on':''}" data-s="firm">Confirmed dates<span class="n">${goN}</span></button>`;
+  $('chips').querySelectorAll('[data-r]').forEach(b=>b.addEventListener('click',()=>{
+    filt.region=b.dataset.r; store.set('orbital.region',filt.region); shown=150; renderChips(); renderList(); }));
+  $('chips').querySelector('[data-s]').addEventListener('click',()=>{
+    filt.status=filt.status==='firm'?'all':'firm'; shown=150; renderChips(); renderList(); });
 }
 
-function renderList(list){
-  document.getElementById('list-body').innerHTML=list.map((l,i)=>`
-    <div class="lrow">
-      <span class="lidx">${String(i+1).padStart(2,'0')}</span>
-      <div class="lbody">
-        <div class="lname">${l.name}</div>
-        <div class="ltags">
-          <span class="ltag">${l.rocket?.configuration?.name||'—'}</span>
-          <span class="ltag">${l.pad?.location?.name||'—'}</span>
-          ${badge(l.status?.abbrev)}
-        </div>
-      </div>
-      <div class="ltime">${fDate(l.net)}</div>
-    </div>`).join('');
+function filtered(){
+  const q=filt.q.trim().toLowerCase();
+  return upcoming().filter(l=>
+    (filt.region==='All'||l.region===filt.region) &&
+    (filt.status==='all'||l.status==='Go'||l.status==='TBC') &&
+    (!q || [l.name,l.vehicle,l.provider,l.location,l.pad,l.type,l.region].join(' ').toLowerCase().includes(q)));
 }
 
-async function fetchLaunches(){
-  const urls=[
-    'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=15&location__ids=12,27,143,106&ordering=net&mode=list',
-    'https://ll.thespacedevs.com/2.2.0/launch/upcoming/?limit=12&ordering=net&mode=list'
-  ];
-  for(const url of urls){
-    try {
-      const r=await fetch(url);
-      if(!r.ok) continue;
-      const d=await r.json();
-      const list=d.results;
-      if(!list?.length) continue;
-      document.getElementById('s-up').textContent=d.count||list.length;
-      renderNext(list[0]);
-      renderList(list.slice(1,13));
-      return;
-    } catch(e){ continue; }
+function rowHTML(l){
+  const w=when(l);
+  const sub=[l.vehicle&&`<b>${esc(l.vehicle)}</b>`, esc(l.provider), esc(l.location.replace(/, USA$/,''))].filter(Boolean).join(' · ');
+  const open=openId===l.id;
+  return `<div class="lrow${open?' open':''}" data-id="${esc(l.id)}">
+      <div class="ldate${w.fuzzy?' fuzzy':''}"><div class="ldate-a">${esc(w.a)}</div><div class="ldate-b">${esc(w.b)}</div></div>
+      <div class="lbody"><div class="lname">${esc(l.name)}</div><div class="lsub">${sub}</div></div>
+      <div class="lright"><span class="ltime${w.fuzzy?' fuzzy':''}">${esc(w.fuzzy?w.time:(FINE.has(l.prec)||!l.prec)&&l.t-Date.now()<86400e3*14?rel(l.t):w.time)}</span>${badge(l)}</div>
+    </div>${open?detHTML(l,w):''}`;
+}
+function detHTML(l,w){
+  return `<div class="ldet">
+    <div class="drow"><span class="dk">T-Zero</span><span class="dv">${esc(w.full)}${w.local?`<small>${esc(w.local)}</small>`:''}</span></div>
+    <div class="drow"><span class="dk">Status</span><span class="dv">${esc(l.statusName||l.status)}</span></div>
+    <div class="drow"><span class="dk">Provider</span><span class="dv">${esc(l.provider||'—')}</span></div>
+    <div class="drow"><span class="dk">Vehicle</span><span class="dv">${esc(l.vehicle||'—')}</span></div>
+    <div class="drow"><span class="dk">Pad</span><span class="dv">${esc(l.pad||'—')}</span></div>
+    <div class="drow"><span class="dk">Site</span><span class="dv">${esc(l.location||'—')}</span></div>
+    <div class="drow"><span class="dk">Mission type</span><span class="dv">${esc(l.type||'—')}</span></div>
+    <div class="drow"><span class="dk">Countdown</span><span class="dv">${esc(w.fuzzy?'—':rel(l.t))}</span></div>
+  </div>`;
+}
+
+function renderList(){
+  const list=filtered();
+  if(!list.length){
+    $('list-body').innerHTML= launches.length ? `<div class="empty">No launches match these filters.</div>` : '';
+    return;
   }
-  document.getElementById('next-name').textContent='Rate Limited';
-  document.getElementById('next-det').innerHTML='<div class="err">TheSpaceDevs API is rate-limited on the free tier (~15 req/hr). Refresh in a few minutes.</div>';
-  document.getElementById('list-body').innerHTML='<div class="err">Launch data unavailable. Try again shortly.</div>';
+  const groups=new Map();
+  list.slice(0,shown).forEach(l=>{ const k=groupKey(l); if(!groups.has(k)) groups.set(k,[]); groups.get(k).push(l); });
+  const total=new Map(); list.forEach(l=>{ const k=groupKey(l); total.set(k,(total.get(k)||0)+1); });
+  $('list-body').innerHTML=[...groups].map(([k,ls])=>
+    `<div class="grp"><span>${esc(k)}</span><span>${total.get(k)}</span></div>${ls.map(rowHTML).join('')}`).join('')
+    + (list.length>shown?`<button class="more" id="more">SHOW ALL ${list.length} LAUNCHES (+${list.length-shown})</button>`:'');
+  $('more')?.addEventListener('click',()=>{ shown=Infinity; renderList(); });
 }
+
+$('list-body').addEventListener('click',e=>{
+  const row=e.target.closest('.lrow'); if(!row) return;
+  openId = openId===row.dataset.id ? null : row.dataset.id;
+  renderList();
+});
+let qT; $('q').addEventListener('input',e=>{ clearTimeout(qT); qT=setTimeout(()=>{ filt.q=e.target.value; shown=150; renderList(); },120); });
+
+function revealInList(id){
+  filt.q=''; $('q').value=''; filt.region='All'; filt.status='all'; shown=Infinity; openId=id;
+  renderChips(); renderList();
+  if(innerWidth<=768) showTab('card-list');
+  requestAnimationFrame(()=>document.querySelector(`.lrow[data-id="${CSS.escape(id)}"]`)?.scrollIntoView({block:'center',behavior:'smooth'}));
+}
+
+/* ── RENDER: ALL ───────────────────────────────────── */
+function renderAll(){
+  const pool=upcoming();
+  $('s-up').textContent=meta.total || pool.length;
+  $('s-week').textContent=pool.filter(l=>l.t-Date.now()<7*86400e3 && (!l.prec||FINE.has(l.prec)||l.prec==='DAY')).length;
+  const ago=Math.round((Date.now()-meta.updated)/60e3);
+  $('list-meta').innerHTML = `${pool.length}${meta.total&&meta.total>launches.length?` of ${meta.total}`:''} launches<br>`+
+    `${meta.source==='mirror'?'dev mirror · ':''}updated ${ago<1?'just now':ago+' min ago'}`+
+    (meta.partial?'<br><span style="color:var(--yellow)">rate limited — rest loading later</span>':'');
+  setPill();
+  renderNext();
+  renderChips();
+  renderList();
+}
+// keep relative times and "updated x min ago" fresh
+setInterval(()=>{ if(launches.length && !document.hidden) renderAll(); }, 60e3);
 
 /* ── INIT ──────────────────────────────────────────── */
-fetchLaunches();
+loadLaunches();
 fetchISS();
 fetchCrew();
-setInterval(fetchISS, 5000);
+setInterval(()=>{ if(!document.hidden) fetchISS(); }, 5000);
+setInterval(fetchCrew, 60*60e3);
+document.addEventListener('visibilitychange',()=>{ if(!document.hidden){ fetchISS(); const c=store.get(CACHE_KEY); if(!c||Date.now()-c.meta.updated>TTL) loadLaunches(); } });
 </script>
 </body>
 </html>
