@@ -69,3 +69,9 @@ The page also saves these in `localStorage`:
 - `orbital.scope`: the All/USA choice on the Next Launch panel
 - `orbital.region`: the selected schedule region
 - `orbital.isstrack`: the recent ISS ground track, so the trail survives reloads
+
+## License
+
+Copyright © 2026 [RLeone37](https://github.com/RLeone37). All Rights Reserved.
+
+This project is proprietary and **not open source**. No part of its source code, data, design or documentation may be copied, modified, distributed or used without written permission. See [LICENSE](LICENSE) for full terms.
